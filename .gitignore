@@ -1,0 +1,14 @@
+# vim
+*.swp
+
+# latex
+*.pdf
+*.aux
+*.fls
+*.log
+*.toc
+*.bbl
+*.blg
+*.lof
+*.lot
+*.fdb_latexmk

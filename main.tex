@@ -1,0 +1,67 @@
+% Document class, with margin for binding
+\documentclass[
+    12pt,
+    a4paper,
+    oneside, %TODO: parge margins
+    %DIV11,
+    BCOR5mm,
+    parskip
+]{scrbook}
+
+% Mathematical packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Input config
+\usepackage{luatextra}
+\usepackage{unicode-math}
+
+% Graphical packages
+\usepackage{tikz}
+\usetikzlibrary{shapes,shapes.arrows}
+\usepackage{graphicx}
+\graphicspath{{./img/}}
+
+% Font config
+\setmainfont{Linux Libertine O}
+\setsansfont{Linux Biolinum O}
+\newfontfamily\scfont[Letters=SmallCaps]{Linux Libertine O}
+\setmathfont{Latin Modern Math}
+\setmonofont{Inconsolata}
+
+% Listings and  pseudo code
+\usepackage{listings}
+\usepackage{algpseudocode}
+
+% References
+%\usepackage{hyperref}
+
+% Custom macros
+\usepackage{mymacros}
+
+\begin{document}
+
+\def\myauthor{Philipp Meyer}
+\def\mytitle{Safety and Liveness Analysis of Petri Nets with SMT Solvers}
+\def\mygermantitle{Sicherheits- und Lebendigkeitsanalyse von Petrinetzen mittels SMT-Lösern}
+\def\mysupervisor{Univ.-Prof.\ Dr.\ Dr.\ h.c.\ Javier Esparza}
+\def\myadvisor{Univ.-Prof.\ Dr.\ Dr.\ h.c.\ Javier Esparza}
+\def\mydate{October 15\textsuperscript{th}, 2014}
+
+\pagenumbering{roman}
+\include{cover}
+\include{declaration}
+\tableofcontents
+\listoffigures
+\pagenumbering{arabic}
+
+\include{sec/introduction}
+%\include{sec/theory}
+%\include{sec/algorithms}
+%\include{sec/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,421 @@
+%!PS-Adobe-3.0
+%%Title: (TUM logos)
+%%Creator: (Marek Kubica <marek@xivilization.net>)
+%%EndComments
+
+% the color (RGB) of the lines
+/TumLightColor [ 0 122 195 ] def
+/TumBlackColor [ 0 0 0 ] def
+% the color of debug drawings
+/ControlColor { [ 143 143 143 ] { 255 div } forall } def
+% divide each color by 255, since PS uses floats to represent colors
+/LineColor { TumBlackColor { 255 div } forall } def
+/Radius 54 def
+
+% small helper function (the name is from Factor)
+/. { pstack } def
+
+% ( radius hole-center hole-degrees -- )
+/semicircle
+ { %def
+	% divide hole-degrees by two
+	2 div
+	% x, y coordinates
+ 	0 0
+	% radius
+ 	4 index
+	% get the starting angle
+	4 index
+        dup
+	5 index add
+	exch
+	% stop angle
+        360 add 5 index sub 
+        arc stroke
+	% remove 3 dangling elements
+	3 npop
+} def
+
+% (radius -- )
+/completecircle
+ { %def
+	0 0 semicircle
+ } def
+
+% removes a number of items from the stack
+% ( n -- )
+/npop
+ {
+	{ pop } repeat
+ } def
+
+/in-logo
+ { %def
+	% circle, radius 54, hole on top (90°), 15° hole
+	Radius 90 15 semicircle
+	% move down a bit
+	0 -45 moveto
+	% draw the line straight up
+	0 60 lineto
+	% draw the path
+	stroke
+ } def
+
+% (radius angle) -- (x y)
+/anglecoords
+ { %def
+	% put args in an array
+	2 array astore
+	% duplicate array
+	dup
+	% unpack the topmost one
+	aload pop
+	% calculate x
+	cos mul
+	% the other array
+	exch
+	% unpack
+	aload pop
+	% calculate y
+	sin mul
+	% done
+ } def
+
+/ar-logo
+ { %def
+	% radius 54, no hole actually
+	Radius completecircle
+	% go to left, lower end of 'A'
+	Radius 230 anglecoords moveto
+	% draw to top of 'A'
+	Radius 90 anglecoords lineto
+	% draw to lower right end of 'A'
+	Radius 310 anglecoords lineto
+	stroke
+	% draw the bar through the A shape
+	Radius 200 anglecoords moveto
+	Radius 340 anglecoords lineto
+	stroke
+ } def
+
+/edu-logo 
+ { %def
+	% draw the upper arc
+	0 0 Radius 352 165 arc
+	Radius 352 anglecoords moveto
+	% draw the lower bar, relative to the current point
+	-60 0 rlineto stroke
+	
+	% draw the lower arc
+	0 0 Radius 172 345 arc
+	Radius 172 anglecoords moveto
+	% draw the lower bar & stroke path
+	60 0 rlineto stroke
+ } def
+
+/wi-logo
+ { %def
+	% draw surrounding circle with the hole
+	Radius 33 115 semicircle
+	% move to angle 200 and a bit outside the circle
+	Radius 10 add 200 anglecoords moveto
+	% draw the three line segments
+	40 35 rlineto
+	20 -15 rlineto
+	55 50 rlineto
+	% stroke the path
+	stroke
+ } def
+
+/ma-logo
+ { %def
+	Radius completecircle
+	% triangle, start with top
+	Radius 90 anglecoords moveto
+	Radius 330 anglecoords lineto
+	Radius 210 anglecoords lineto
+	Radius 90 anglecoords lineto
+	% now back at top, continue with hexagon
+	Radius 30 anglecoords lineto
+	Radius 330 anglecoords lineto
+	Radius 270 anglecoords lineto
+	Radius 210 anglecoords lineto
+	Radius 150 anglecoords lineto
+	Radius 90 anglecoords lineto
+	% back at top, stroke path
+	stroke
+ } def
+
+/ph-logo
+ { %def
+	% gsave, grestore have to be symmetric, 
+	% grestore 2 times in a row does not work
+	% draw the surrounding circle
+	Radius completecircle
+	% save the scale and rotation
+	gsave
+		% draw vertical orbital
+	        0.33 1 scale
+		Radius completecircle
+	grestore
+	% draw the topleft-bottomright orbital
+	gsave
+		60 rotate
+		0.33 1 scale
+		Radius completecircle
+        grestore
+	% draw the bottomleft-topright orbital
+	gsave
+		-60 rotate
+		0.33 1 scale
+		Radius completecircle
+        grestore
+ } def
+
+/bv-logo
+ { %def
+	% draw the circle and the straight line
+	Radius completecircle
+	Radius 170 anglecoords moveto
+	Radius 10 anglecoords lineto
+	stroke
+	% draw the lower arc, scaled to be 200% width
+	gsave
+		1 0.50 scale
+		% x-offset y-offset radius start-angle stop-angle
+		0 -70 Radius 20 add 45 135 arc stroke
+	grestore
+ } def
+
+/sp-logo
+ { %def
+	 Radius 5 sub 330 170 semicircle
+	 % lower semicircle with line
+	 0 0 Radius 270 330 arc stroke
+	 Radius 270 anglecoords moveto
+	 -70 0 rlineto stroke
+	 % upper semicircle with line
+	 0 0 Radius 90 170 arc stroke
+	 Radius 90 anglecoords moveto
+	 60 0 rlineto stroke
+ } def
+
+/ch-logo
+ { %def
+	 Radius 90 24 semicircle
+	 % right part
+	 Radius 78 anglecoords moveto
+	 -3 -7 rlineto
+	 0 -20 rlineto
+	 Radius 315 anglecoords lineto
+	 stroke
+	 % left part
+	 Radius 102 anglecoords moveto
+	 3 -7 rlineto
+	 0 -20 rlineto
+	 Radius 225 anglecoords lineto
+	 stroke
+ } def
+
+/wzw-logo
+ {
+	 % draw the circle
+	 Radius 90 70 semicircle
+	 
+	 % right wing
+	 % starting point
+	 Radius 275 anglecoords moveto
+	 0 45 rlineto
+	 % first control point
+	 30 60 anglecoords
+	 % second control point
+	 2 copy
+	 % end point: on the circle
+	 Radius 55 anglecoords
+	 curveto stroke
+	 
+	 % middle line
+	 Radius 270 anglecoords moveto
+	 0 Radius 2 mul 2 add rlineto stroke
+	 
+	 % draw left wing
+	 Radius 265 anglecoords moveto
+	 0 45 rlineto
+	 % first control point
+	 30 120 anglecoords
+	 % second control point
+	 2 copy
+	 % end point
+	 Radius 125 anglecoords
+	 curveto stroke
+ } def
+
+% ( x1 y1 x2 y2 x3 y3 -- )
+/bezierto
+ { %def
+	 % collect all args
+	 /endy exch def
+	 /endx exch def
+ /cont2y exch def
+ /cont2x exch def
+ /cont1y exch def
+ /cont1x exch def
+ currentpoint
+ /orgy exch def
+ /orgx exch def
+ % got all points, fine, draw control lines
+ gsave
+	 % make dashed output, in some other color
+	 [ 7 3 ] 0 setdash
+	 ControlColor setrgbcolor
+	 % draw first control line
+	 cont1x cont1y lineto
+	 % draw second control line
+	 cont2x cont2y moveto
+	 endx endy lineto
+	 stroke
+ grestore
+ % draw the actual curve
+ cont1x cont1y cont2x cont2y endx endy curveto
+} def
+
+% calculate a rotation matrix
+% / cos(α)  -sin(α) \
+% \ sin(α)   cos(α) /
+% (angle -- array)
+/rotationmatrix 
+ { %def
+	 % calculate the d value
+	 dup cos
+	 % got d value, goto c
+	 exch dup sin -1 mul
+	 % got c value, goto b
+	 exch dup sin
+	 % got b value, goto a
+	 exch cos
+	 % a value, that's it
+
+	 % package them into a nifty array
+	 4 array astore
+ } def
+
+% multiply a matrix with a vector
+% (matrix v w -- x y)
+/matrixmul
+ { %def
+	 /w exch def
+	 /v exch def
+	 aload pop
+	 /d exch def
+	 /c exch def
+	 /b exch def
+	 /a exch def
+	 a v mul b w mul add
+	 c v mul d w mul add
+ } def
+
+% add two points component-wise together
+% (ox oy px py -- x y)
+/offset
+ { %def
+	 3 2 roll add
+	 3 1 roll add
+	 exch
+ } def
+
+% which bezier curve operator to use?
+% choices: curveto (default) bezierto (debug/visualize)
+/curveop { curveto } def
+%/curveop { bezierto } def
+
+/med-logo
+{ %def
+	% some definitions
+	% rotate the last curve clockwise
+	/matrix -12 rotationmatrix def
+	% endpoint of last curve
+	/offpoint { 0 60 } def
+	% multiply the matrix with x y and anjust the result to the offset
+	% (x y -- v w)
+	/rotatedpoint 
+	 { %def 
+	 	matrix 
+ 	 	3 1 roll
+ 	 	matrixmul offpoint offset
+         } def
+
+	% semicircle
+	Radius 90 160 semicircle
+	% lower line segment
+	/lowpoint { Radius 270 anglecoords } def
+
+	lowpoint 20 sub moveto
+	0 20 rlineto
+	% curve 1
+	-10 -32
+	-10 -21
+	0 -10
+	curveop
+	% curve 2
+	12 -2.5
+	12 12.5
+	0 20
+	curveop
+	% curve 3
+	-12 30
+	-30 55
+	offpoint
+	curveop
+	% curve 4
+	% both control points 5 point above the baseline
+	6.25 5 rotatedpoint
+	18.75 5 rotatedpoint
+	25 0 rotatedpoint
+	curveop
+        % finally, draw the path
+	stroke
+} def
+
+/uni-logo
+{ %def
+	/multiplier 20 def
+	multiplier 5 div setlinewidth
+	% (x y -- multix multiy)
+	/embiggen { multiplier mul exch multiplier mul exch } def
+	0 0 moveto
+
+	% steps to move to in the format [right up]
+	[
+		[1 0]
+		[0 -5]
+		[1 0]
+		[0 5]
+		[1 0]
+		[0 -5]
+		[3 0]
+		[0 5]
+		[1 0]
+		[0 -5]
+		[1 0]
+		[0 5]
+		[1 0]
+		[0 -5]
+		[1 0]
+		[0 6]
+		[-5 0]
+		[0 -5]
+		[-1 0]
+		[0 5]
+		[-4 0]
+	] { aload pop embiggen rlineto } forall
+        % close the path and stroke it
+	closepath stroke
+} def
+
+% set the color of the strokes
+LineColor setrgbcolor
+
+% transform the coordinates
+300 500 translate
+% draw the logo by calling the desired function
+% (happens in subfiles now)
