@@ -3,18 +3,16 @@ LATEXMK_OPT = -pdflatex=lualatex -latexoption=-halt-on-error -pdf
 
 all: pdf
 
-main.pdf: images
-	$(LATEXMK) $(LATEXMK_OPT) main.tex
+%.pdf: %.tex img
+	$(LATEXMK) $(LATEXMK_OPT) $<
 
-label.pdf:
-	$(LATEXMK) $(LATEXMK_OPT) label.tex
+.PHONY: img pdf clean
 
-.PHONY: images pdf clean
-images:
+img:
 	$(MAKE) -C img
 
 pdf: main.pdf label.pdf
 
 clean:
 	$(MAKE) -C img clean
-	rm -f main.pdf label.pdf *.aux *.fls *.log *.toc *.bbl *.blg *.lof *.lot *.fdb_latexmk
+	rm -f *.pdf *.aux *.fls *.log *.toc *.bbl *.blg *.lof *.lot *.fdb_latexmk
