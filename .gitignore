@@ -12,3 +12,6 @@
 *.lof
 *.lot
 *.fdb_latexmk
+*.bcf
+*.out
+*.run.xml

@@ -35,7 +35,21 @@
 \usepackage{algpseudocode}
 
 % References
-%\usepackage{hyperref}
+%\usepackage[hidelinks]{hyperref}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{hyperref}
+%\usepackage[style=numeric,mincrossrefs=99,backend=biber]{biblatex}
+\usepackage[hyperref=true,
+    url=false,
+    isbn=false,
+    backref=true,
+    style=numeric-comp,
+    mincrossrefs=100,
+    backend=biber,
+    block=none]{biblatex}
+\usepackage{doi}
+
+\bibliography{references}
 
 % Custom macros
 \usepackage{mymacros}
@@ -61,7 +75,8 @@
 %\include{sec/algorithms}
 %\include{sec/conclusion}
 
-\bibliographystyle{plain}
-\bibliography{references}
+%\bibliographystyle{plain}
+%\bibliography{references}
+\printbibliography{}
 
 \end{document}
