@@ -1,0 +1,308 @@
+\chapter{Experimental evaluation}
+\label{chap:experimental_evaluation}
+
+We implemented our algorithms in a tool called
+\emph{Pe\-tri\-ni\-zer}. 
+Petrinizer is implemented as a script on top of the 
+% combination of Bash and Prolog scripts,
+Z3 SMT solver~\cite{MouraB08}.
+It takes as input coverability problem instances encoded in the MIST
+input format\footnote{\url{https://github.com/pierreganty/mist}}, and it
+runs one of the selected methods. 
+We implemented all possible combinations of
+methods: with and without trap refinement, with rational and integer arithmetic,
+with and without invariant construction, with and without invariant
+minimization.
+
+Our evaluation had two main goals. First, as the underlying
+methods are incomplete, we wanted to measure their success rate on standard
+benchmark sets. 
+As a subgoal, we wanted to investigate
+the usefulness and necessity of traps, the benefit of using integer arithmetic
+over rational arithmetic, and the sizes of the constructed invariants.
+The second goal was to measure Petrinizer's performance and to compare it
+with state-of-the-art tools: 
+IIC~\cite{KloosMNP13}, BFC\footnote{The most recent version of BFC at the time of
+writing the paper was 2.0. However, we noticed it sometimes reports
+inconsistent results, so we used version 1.0 instead. The tool can be
+obtained at \url{http://www.cprover.org/bfc/}.}~\cite{KaiserKW12}, and
+MIST\footnote{MIST consists of several methods, most of them based on
+  EEC~\cite{GeeraertsRB06}. We used the abstraction
+  refinement method that tries to minimize the number of places in the
+  Petri net~\cite{GantyRB08}.}.
+
+\paragraph{Benchmarks.} For the inputs used in the experiments, we collected 
+coverability problem instances originating from various sources. The
+collection contains 178 examples, out of which 115 are safe, and is
+organized into five example suites. The first suite is a collection of
+Petri net examples from the MIST toolkit. This suite contains a
+mixture of 29 examples, both safe and unsafe. It contains both real-world and
+artificially created examples. The second suite consists of 46 Petri nets
+that were used in the evaluation of BFC~\cite{KaiserKW12}. They
+originate from the analysis of concurrent C programs, and they are mostly
+unsafe. The third and the fourth suites come from the
+provenance analysis of messages in a medical system and a
+bug-tracking system~\cite{MajumdarMW13}. The medical suite contains 12 safe
+examples, and the bug-tracking suite contains 41 examples, all
+safe except for one. The fifth suite contains 50 examples that
+come from the analysis of Erlang programs~\cite{DOsualdoKO13}. We generated
+them ourselves using an Erlang verification tool called Soter~\cite{DOsualdoKO13},
+from the example programs found on Soter's
+website\footnote{\url{http://mjolnir.cs.ox.ac.uk/soter/}}. Out of 50 examples in
+this suite, 38 are safe. This suite also contains the largest example in the
+collection, with 66,950 places and 213,635 transitions.
+For our evaluation, only the 115 safe instances are interesting.
+
+\begin{table}[t]
+  \centering
+  \caption[Safe examples that were successfully proved safe.] 
+    {Safe examples that were successfully proved safe. Symbols
+     $\mathbb{Q}$ and $\mathbb{Z}$ denote rational and integer numbers.}
+\label{table:rate-of-success}
+  \scriptsize
+  \begin{tabular}{lrrrrrrrr}
+    \toprule
+    \multicolumn{1}{c}{Suite} &
+    \multicolumn{1}{c}{Safety/$\mathbb{Q}$} &
+    \multicolumn{1}{c}{Safety/$\mathbb{Z}$} &
+    \multicolumn{1}{c}{Ref./$\mathbb{Q}$} &
+    \multicolumn{1}{c}{Ref./$\mathbb{Z}$} &
+    \multicolumn{1}{c}{IIC} &
+    \multicolumn{1}{c}{BFC} &
+    \multicolumn{1}{c}{MIST} &
+    \multicolumn{1}{c}{Total} \\
+    \midrule
+    MIST        & 14 & 14& 20 & 20 & {\textbf 23} & 21 & 19 & 23 \\
+    BFC          & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & 2 \\
+    Medical      & 4 & 4 & 4 & 4 & 9 & {\textbf 12} & 10 & 12 \\
+    Bug-tracking & {\textbf 32} & {\textbf 32} & {\textbf 32} & {\textbf 32} & 0 & 0 & 0 & 40 \\
+    Erlang       & 32 & 32 & 36 & {\textbf 38} & 17 & 26 & 2 & 38 \\
+    \midrule
+    Total        & 84 & 84 & 94 & {\textbf 96} & 51 & 61 & 33 & 115 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Rate of success on safe examples.}
+As shown in Table~\ref{table:rate-of-success}, even with the weakest of the
+methods ---safety based on marking equation over rationals--- Petrinizer is
+able to prove safety for 84 out
+of 115 examples. Switching to integer arithmetic does not help: the number of
+examples proved safe remains 84. 
+Using refinement via traps, Petrinizer proves
+safety for 94 examples. Switching to integer arithmetic in this case helps:
+Another two examples are proved safe, totaling 96 out of 115 examples. 
+In contrast to these numbers, the most successful existing tool turned out to be BFC, proving safety for
+only 61 examples. 
+% The small numbers are due to time and memory limits. 
+Even though the methods these tools implement
+are theoretically complete, the tools themselves are limited by the time and space they can
+use.
+
+Looking at the results accross different suites, we see that Petrinizer
+performed poorest on the medical suite, proving safety for only 4 out of 12
+examples. On the other hand, on the bug-tracking suite, which was completely
+intractable for other tools, it proved safety for 32 out of 40 examples.
+Furthermore, using traps and integer arithmetic, Petrinizer successfuly proved
+safety for all safe Erlang examples. We find this result particularly
+surprising, as the original verification problems for these examples seem non-trivial.
+
+\begin{figure}[t]
+  \centering
+  \input{fig/petrinizer_various}
+  \caption[Invariant sizes and time overhead of Petrinizer options.]{Graph on the top left shows a relation of sizes of constructed
+  invariants to the number of places in the corresponding Petri nets. Graph
+  on the bottom left shows comparison in size of invariants produced by Petrinizer and
+  IIC\@. Axes represent size on a logarithmic scale. Each dot represents
+  one example.
+  The four graphs in the center and on the right show time
+  overhead of integer arithmetic, trap refinement, invariant
+  construction and invariant minimization. Axes represent time in
+  seconds on a logarithmic scale. Each dot represents execution time
+  on one example. The graph on the top right only shows examples for
+  which at least one trap appeared in the refinement. Similarly, the
+  bottom center and bottom right graphs only show safe examples.}
+\label{fig:petrinizer-various}
+\end{figure}
+
+\paragraph{Invariant sizes.} 
+We measure the size of inductive invariants produced by Pe\-tri\-ni\-zer without
+minimization.
+We took the number of atomic (non-zero) terms appearing in an invariant's linear expressions
+as a measure of its size. When we relate sizes of invariants to number of places
+in the corresponding Petri net (top left graph in Fig.~\ref{fig:petrinizer-various}), we
+see that invariants are usually very succinct. As an example, the
+largest invariant had 814 atomic terms, and the corresponding Petri net, coming
+from the Erlang suite, had 4,763 places. For the largest Petri net, 
+with 66,950 places, the constructed invariant had 339 atomic
+terms.
+
+The added benefit of minimization is negligible: there are only four examples where the invariant
+was reduced, and the reduction was about 2–3\%. 
+Thus, invariant minimization does not pay off for these examples.
+
+We also compared sizes of constructed invariants with
+sizes of invariants produced by IIC~\cite{KloosMNP13}. IIC's invariants
+are expressed as CNF formulas over atoms of the form $x<a$,
+for a variable $x$ and a constant $a$. As a measure of size for these formulas,
+we took the number of atoms they contain. As the bottom left graph in
+Fig.~\ref{fig:petrinizer-various} shows, when compared to IIC's invariants, Petrinizer's invariants
+are never larger, and are often orders of magnitude smaller.
+
+\begin{table}[t]
+  \centering
+  \caption[Mean and median times in seconds for each tool.]
+  {Mean and median times in seconds for each tool. We report
+  times for safe examples, as well as for all examples. Memory-out cases were
+  set to the timeout value of 100,000 s. Symbols
+  $\mathbb{Q}$ and $\mathbb{Z}$ denote rational and integer numbers.}
+\label{table:mean-median-times}
+  \scriptsize
+  \begin{tabular}{lrrrrrr}
+    \toprule
+    Method/tool & Safety/$\mathbb{Q}$ & Safety/$\mathbb{Z}$ & Ref./$\mathbb{Q}$ &
+    Ref./$\mathbb{Z}$ & Safety+inv. & Safety+inv.min. \\
+    \midrule
+    Mean (safe)   & 69.26 & 70.20 & 69.36 & 72.20 & 168.46 & 203.05 \\
+    Median (safe) & 2.45 & 2.23 & 2.35 & 3.81 & 3.70 & 4.03 \\
+    \midrule
+    Mean (all)    & 45.17 & 46.04 & 45.52 & 47.70 & 109.23 & 131.58 \\
+    Median (all)  & 0.44 & 0.43 & 0.90 & 0.93 & 0.66 & 1.00 \\
+    \bottomrule
+  \end{tabular}
+  
+  \vspace{1ex}
+  
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Method/tool &
+    Ref.+inv. & Ref.+inv.min. & IIC & BFC & MIST \\
+    \midrule
+    Mean (safe)   & 228.88 & 275.12 & 56954.09 & 47126.12 & 69196.77 \\
+    Median (safe) & 5.96 & 6.30 & 100000.00 & 1642.43 & 100000.00 \\
+    \midrule
+    Mean (all)    & 148.57 & 178.45 & 44089.93 & 31017.80 & 61586.56 \\
+    Median (all)  & 1.37 & 1.94 & 138.00 & 0.77 & 100000.00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Performance.} To ensure accuracy and fairness, all experiments were
+performed on identical machines, equipped with Intel Xeon 2.66 GHz CPUs and 48 GB of memory, running Linux 3.2.48.1
+in 64-bit mode. Execution time was limited to 100,000 seconds (27
+hours, 46 minutes and 40 seconds), and memory to 2 GB\@.
+
+Due to dissimilarities between the compared tools, selecting a fair
+measure of time was non-trivial. On the one hand, as
+Petrinizer communicates with Z3 via temporary files, it spends a
+considerable amount of time doing I/O operations.  On the other hand,
+as BFC performs both a forward and a backward search, it naturally
+splits the work into two threads, and runs them in parallel on two CPU
+cores. In both cases, the actual elapsed time does not quite
+correspond to the amount of computational effort we wanted to measure.
+Therefore, for the measure of time we selected the \emph{user time},
+as reported by the \emph{time} utility on Linux. User time measures
+the total CPU time spent executing the process and its children. In
+the case of Petrinizer, it excludes the I/O overhead, and in the case
+of BFC, it includes total CPU time spent on both CPU cores.
+
+We report mean and median times measured for each tool in
+Table~\ref{table:mean-median-times}.
+
+\paragraph{Time overhead of Petrinizer's methods.} Before comparing Petrinizer
+with other tools, we analyze time overhead of integer arithmetic, trap refinement, invariant construction, and invariant minimization.
+The four graphs in the center and on the right in
+Fig.~\ref{fig:petrinizer-various} summarize the results. The top
+central graph shows that the difference in performance between integer
+and rational arithmetic is negligible.
+
+The top right graph in Fig.~\ref{fig:petrinizer-various} shows that traps
+incur a significant overhead. This is not too surprising as, each time
+a trap is found, the main system has to be updated with a new trap
+constraint and solved again. Thus the actual overhead depends on the number
+of traps that appear during the refinement. In the experiments, there
+were 32 examples for refinement with integer arithmetic where traps
+appeared at least once. The maximal number of traps in a single example was 9.
+In the examples where traps appear once, we see a slowdown of 2–3$\times$. In
+the extreme cases with 9 traps we see slowdowns of 10–16$\times$.
+
+In the case of invariant construction, as shown on the bottom central graph in
+Fig.~\ref{fig:petrinizer-various}, the overhead is more
+uniform and predictable. The reason is that constructing the invariant
+involves solving the dual form of the main system as many times as
+there are disjuncts in the property violation constraint. In most
+cases, the property violation constraint has one disjunct. A single example
+with many disjuncts, having 8989 of them, appears on the graph
+as an outlier.
+
+In the case of invariant minimization, as the bottom right
+graph in Fig.~\ref{fig:petrinizer-various} shows, time overhead is
+quite severe.
+The underlying data contains examples of slowdowns of up to 30$\times$.
+
+\begin{figure}[t]
+  \centering \input{fig/performance_vs_tools}
+  \caption[Comparison of execution time for Petrinizer vs.~IIC,
+  BFC and MIST.\@]{Comparison of execution time for Petrinizer vs.~IIC,
+  BFC and MIST\@. Graphs in the top row show comparison in the case without
+  invariant construction, and graphs in the bottom row show comparison in
+  the case with invariant construction. Axes represent time in seconds on a
+  logarithmic scale. Each dot represents execution time on one example.}
+\label{fig:performance-vs-tools}
+\end{figure}
+
+\paragraph{Comparison with other tools.} The six graphs in
+Fig.~\ref{fig:performance-vs-tools} show the comparison of execution times 
+for Petrinizer vs.~IIC, BFC, and MIST\@. 
+In the comparison, we used
+the refinement methods, both with and without invariant construction.
+In general, we observe that other tools outperform
+Petrinizer on small examples, an effect that can be explained by the
+overhead of starting script interpreters and Z3. 
+However, on large examples Petrinizer consistently outperforms other tools.
+Not only does it finish in all cases within the given time and memory
+constraints, it even finishes in under 100
+seconds in all but two cases. The two cases are the
+large example from the Erlang suite, with 66,950 places and 213,635
+transitions and, in the case of invariant construction, the example
+from the MIST suite, with 8989 disjuncts in the property violation constraint.
+
+\paragraph{Conclusions.}
+%
+Marking equations and traps are classical techniques in Petri net theory, but have fallen out of favor
+in recent times in comparison with state-space traversal techniques in combination with abstractions
+or symbolic representations.
+Our experiments demonstrate that, when combined with the power of a modern SMT solver, these techniques
+can be surprisingly effective in finding proofs of correctness (inductive invariants) of common benchmark examples arising
+out of software verification.
+
+Our results also suggest 
+incorporating these techniques into existing tools as a cheap preprocessing step.
+A finer integration with these tools is conceivable, where a
+satisfying assignment to a system of constraints is used to guide the more
+sophisticated search, similar to~\cite{WimmelWolf12}.
+
+% It remains to be seen whether these techniques can be used to check liveness properties of concurrent
+% software, which often reduce to Petri net \emph{reachability} problems and are out of scope of other
+% state-space traversal techniques. Also, a combination with the technique
+% of \cite{WimmelWolf12} should be explored.
+
+\smallskip
+\noindent\textit{Acknowledgements.}
+%
+We thank Emanuele D'Osualdo for help with the Soter tool.
+Ledesma-Garza was supported by the
+Collaborative Research Center 1480 ``Program and Model Analysis'' funded by the German Research Council.
+
+% Benchmarks
+
+% Properties
+
+% Rate of success
+
+% Invariant sizes
+
+% Performance
+
+% Comparison with other tools
+

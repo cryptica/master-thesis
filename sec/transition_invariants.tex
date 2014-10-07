@@ -1,0 +1,65 @@
+\section{Transition invariants}
+\label{sec:transition_invariants}
+
+\begin{definition}[Transition invariant]
+A \emph{transition invariant} (also \emph{T-invariant}) of
+a Petri net is a firing vector $X$ with
+$$
+CX = 0.
+$$
+\end{definition}
+
+\begin{definition}[Quasi transition invariant]
+A \emph{semi-positve quasi transition invariant} of
+a Petri net is a firing vector $X$ with
+\begin{align*}
+CX &≥ 0 \\
+ X &≥ 0 \\
+ X &≠ 0.
+\end{align*}
+\end{definition}
+
+\begin{lemma}
+    If a Petri net has an infinite firing sequence $σ$, then
+    there is a solution $X$ to the constraints $C_T$
+    with $X(t) > 0 \iff t ∈ \inf(σ)$.
+\end{lemma}
+\begin{proof}
+    Let $m_0 \xrightarrow{σ}$ be the infinite firing sequence.
+    A certain set of transitions in $σ$ only fire finitely often,
+    after which the remaining transitions all fire infinitely often.
+    Therefore the sequence can be decomposed into a finite part $σ_0$ and
+    an infinite part $σ'$ such that $σ=σ_0σ'$,
+    $\inf(σ') = \inf(σ)$ and $\fin(σ') = \emptyset$.
+
+    With this we have $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1}$.
+
+    With this we have
+    $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1} m_2 \xrightarrow{σ''}$
+    with $σ=σ_0σ_1σ_2σ''$ and $m_2 ≥ m_1$.
+    As $σ_1$ is not empty, we have $X_{σ_1} ≠ 0$ and $X_{σ_1} ≥ 0$.
+    and as $m_2 = m_1 + CX$, we have $CX = m_2 - m_1 ≥ 0$.
+    Therefore $X_{σ_1}$ is a solution to the constraints $C_T$ and
+    $X_{σ_1}(t) > 0 \iff t ∈ \fin(σ_1) \iff t ∈ \inf(σ)$.
+\end{proof}
+
+\begin{definition}
+For a liveness property $ψ$, the corresponding constraint
+$C_ψ$ is given by
+\begin{align*}
+    C_t           &:= t > 0 \\
+    C_{\neg ψ}    &:= \neg C_ψ \\
+    C_{ψ \land φ} &:= C_ψ \land C_φ \\
+    C_{ψ \lor φ}  &:= C_ψ \lor C_φ
+\end{align*}
+\end{definition}
+
+\begin{theorem}
+    For a Petri net $N$ and a liveness property $ψ$,
+    If there is no solution to the constraints $C_T \cup \{ C_{¬ψ} \}$,
+    then $N \models ψ$.
+\end{theorem}
+\begin{proof}
+    Assume there is an infinite firing sequence $σ$ such that
+    $σ \models Ψ$.
+\end{proof}

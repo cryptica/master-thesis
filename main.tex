@@ -3,15 +3,16 @@
     12pt,
     a4paper,
     oneside, %TODO: parge margins
+    listof=leveldown,
     %DIV11,
     BCOR5mm,
     parskip
 ]{scrbook}
 
-% Mathematical packages
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{mathtools}
 
 % Input config
 \usepackage{luatextra}
@@ -19,7 +20,9 @@
 
 % Graphical packages
 \usepackage{tikz}
-\usetikzlibrary{shapes,shapes.arrows}
+\usetikzlibrary{arrows,shapes,shapes.multipart,shapes.geometric,
+                snakes,automata,backgrounds,petri,calc,positioning}
+\usepackage{gnuplot-lua-tikz}
 \usepackage{graphicx}
 \graphicspath{{./img/}}
 
@@ -30,29 +33,36 @@
 \setmathfont{Latin Modern Math}
 \setmonofont{Inconsolata}
 
-% Listings and  pseudo code
+% Listings, tables and pseudo code
 \usepackage{listings}
 \usepackage{algpseudocode}
+\usepackage{booktabs}
 
-% References
+% References and appendix
 %\usepackage[hidelinks]{hyperref}
 \usepackage[autostyle=true]{csquotes}
 \usepackage{hyperref}
-%\usepackage[style=numeric,mincrossrefs=99,backend=biber]{biblatex}
 \usepackage[hyperref=true,
     url=false,
     isbn=false,
-    backref=true,
-    style=numeric-comp,
+    backref=true, % TODO: Remove before printing
+    style=alphabetic,
+    %tyle=ieee,
     mincrossrefs=100,
     backend=biber,
-    block=none]{biblatex}
+    block=none
+]{biblatex}
+\DefineBibliographyStrings{english}{%
+    bibliography = {References},
+}
 \usepackage{doi}
+\usepackage{appendix}
 
 \bibliography{references}
 
-% Custom macros
+% Custom macros and formatting
 \usepackage{mymacros}
+\usepackage{ar-alg}
 
 \begin{document}
 
@@ -67,16 +77,28 @@
 \include{cover}
 \include{declaration}
 \tableofcontents
+\listoftables
 \listoffigures
 \pagenumbering{arabic}
 
 \include{sec/introduction}
-%\include{sec/theory}
-%\include{sec/algorithms}
-%\include{sec/conclusion}
 
-%\bibliographystyle{plain}
-%\bibliography{references}
-\printbibliography{}
+\include{sec/basic_definitions}
+
+\include{sec/checking_safety_properties}
+
+\include{sec/checking_liveness_properties}
+
+\include{sec/implementation}
+
+\include{sec/experimental_evaluation}
+
+\include{sec/conclusion}
+
+\printbibliography[heading=bibintoc]
+
+%\begin{appendices}
+%\chapter{Some Appendix}
+%\end{appendices}
 
 \end{document}

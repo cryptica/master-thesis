@@ -1,0 +1,141 @@
+\section{Minimizing invariants}
+\label{sec:minimizing_invariants}
+
+\paragraph{Minimizing invariants.} Note that the system $\mathcal{S}'$
+from Theorem~\ref{thm:dual} may in general have many
+solutions, and each solution yields an inductive invariant. Solutions where
+$\lambda$ has fewer non-zero components yield shorter 
+inductive invariants $I(M)$, assuming terms in $I(M)$
+with coefficient zero are left out. 
+We can force the number of
+non-zero components to be at most $K$ by introducing a vector of $|P|$
+variables $Z$, adding for each $p\in P$ constraints
+\begin{align*}
+  & \lambda(p)>0\implies Z(p)=1 \\
+  & \lambda(p)=0 \implies Z(p)=0
+\end{align*}
+and adding a constraint $\sum_{p\in P} Z(p) \leq K$. By varying $K$, we
+can find a solution with the smallest number of non-zero
+components in $\lambda$.
+
+% \begin{enumerate}
+% \item The constraints given by \safetyref\ are unsat if{}f the
+%   constraints by \invariantref\ are satisfiable.
+% \item If the constraints by \invariantref\ are sat, then there is some
+%   inductive invariant.
+% \end{enumerate}
+
+% \\ \mbox{ } \\
+% \\ \mbox{ } \\
+% \\ \mbox{ } \\
+% \\ \mbox{ } \\
+
+% Note we can express a set of trap constraints as a linear equation
+% of the form $DM \ge 1$, where $D$ encodes the places in each trap.
+% We can combine these with the negation of the property $AM \ge b$
+% to obtain a new constraint $A'M \ge b'$, with
+% $A' = (D A)^T$ and $b' = (1 b)^T$.
+% The new constraint is then equivalent to $DM \ge 1 \land AM \ge b$.
+
+% We can use this constraint instead of the negation of the property
+% to obtain a linear constraint $I(M)$ with method Invariant.
+% However, to obtain an invariant which only excludes violations of
+% the property, we have to add back the trap constraints.
+% By this, we obtain the invariant
+
+% $$I'(M) := DM \ge 1 \land I(M)$$
+
+% The invariant $I'(M)$ holds for all reachable markings, as the traps are marked
+% initially and therefore also marked in all reachable markings and
+% $I(M)$ holds for all reachable markings. 
+
+% Let $M$ be a marking $M$ violating the property, i.e. $AM \ge b$.
+% If $DM \ge 1$ does not hold, then $I'(M)$ does not hold.
+% Otherwise, $DM \ge 1 \land AM \ge b$ holds and by the
+% the properties of $I(M)$ also $I(M)$ and $I'(M)$ do not hold.
+
+% The invariant $I'(M)$ is inductive, as traps are inductive and $I(M)$ is inductive.
+
+\paragraph{Example.}
+
+\begin{figure}[t]
+Inductivity constraints
+$$
+\begin{array}[t]{clclclclclcl}
+    -  & p_1 &  +  & p_2 &     &     &  +  & bit_1 &  -  & notbit_1 &  \le  & 0 \\
+       &     &  -  & p_2 &  +  & p_3 &     &       &     &          &  \le  & 0 \\
+       & p_1 &     &     &  -  & p_3 &  -  & bit_1 &  +  & notbit_1 &  \le  & 0
+\end{array}
+$$
+
+$$
+\begin{array}[t]{clclclclclclclclclcl}
+    -  & q_1 &  +  & q_2 &     &     &     &     &     &     &  -  & notbit_2 &  \le  & 0  \\
+       &     &  -  & q_2 &  +  & q_3 &     &     &     &     &     &          &  \le  & 0  \\
+       &     &     &     &  -  & q_3 &  +  & q_4 &     &     &  +  & notbit_2 &  \le  & 0  \\
+       & q_1 &     &     &     &     &  -  & q_4 &     &     &     &          &  \le  & 0  \\
+       &     &  -  & q_2 &     &     &     &     &  +  & q_5 &     &          &  \le  & 0  \\
+       & q_1 &     &     &     &     &     &     &  -  & q_5 &  +  & notbit_2 &  \le  & 0 
+\end{array}
+$$
+
+Safety constraint
+$$    
+p_1 + q_1 + notbit_1 + notbit_2 < target_1 + target_2 + trap_1
+$$
+
+Property constraints
+\begin{alignat*}{4}
+  p_1 & \ge 0 & \qquad q_1 & \ge 0 & \qquad q_4 & \ge 0 & \qquad bit_1 & \ge 0  \\
+  p_2 & \ge trap_1 & \qquad q_2 & \ge trap_1 & \qquad q_5 & \ge target_2& \qquad notbit_1 & \ge trap_1 \\
+  p_3 & \ge target_1  & \qquad q_3 & \ge trap_1 & & & \qquad notbit_2 & \ge trap_1
+\end{alignat*}
+
+Non-negativity constraints
+$$
+  target_1, target_2, trap_1 \ge 0
+$$
+
+\caption[Constraints $\mathcal{S}'$ for Lamport's
+    algorithm and the mutual exclusion property.]
+    {Constraints $\mathcal{S}'$ for Lamport's
+algorithm and the mutual exclusion property. Here, $\lambda=(p_1\ p_2\
+p_3\ q_1\ q_2\ q_3\ q_4\ q_5\ bit_1\ notbit_1\ notbit_2)$,
+$Y_1=(target_1\ target_2)$ and $Y_2=(trap_1)$.}
+\label{fig:example-constraints}
+\end{figure}
+
+Consider again Lamport's algorithm and the mutual
+exclusion property. Recall that the negation of the property for this example is $p_3 \ge 1 \land q_5 \ge 1$, and the trap constraint is
+$p_2 + q_2 + q_3 + notbit_1 + notbit_2 \ge 1$.
+%
+Fig.~\ref{fig:example-constraints} shows the constraints $\mathcal{S}'$ for this example. 
+A possible satisfying assignment sets $q_1$, $q_4$, and
+$bit_1$ to 0, $p_2$, $p_3$, and $target_1$ to 2, and all other
+variables to 1.
+%\begin{alignat*}{5}
+%  p_1 &= 1 & \qquad q_1 &= 0 & \qquad q_4 &= 0 & \qquad bit_1 &= 0 &
+%  \qquad target_1 &= 2 \\
+%  p_2 &= 2 & \qquad q_2 &= 1 & \qquad q_5 &= 1 & \qquad notbit_1 &= 1 &
+%  \qquad target_2 &= 1 \\
+%  p_3 &= 2 & \qquad q_3 &= 1 & & & notbit_2 &= 1 & \qquad trap_1 &= 1
+%\end{alignat*}
+The corresponding inductive invariant is:
+\begin{align*}
+I(M)\ ::=&\ (p_2 + q_2 + q_3 + notbit_1 + notbit_2 \ge 1 ) \; \land \\
+&\ (p_1 + 2 p_2 + 2 p_3 + notbit_1 + notbit_2 + q_2 + q_3 + q_5 \le 3)\,.
+\end{align*}
+%
+If we add constraints that bound the number of non-zero components in
+$\lambda$ to 7, the SMT solver finds a new solution, setting $p_2$, $p_3$, $notbit_1$, $notbit_2$, $q_2$, $q_3$,
+$target_1$, $target_2$, and $trap_1$ to $1$, and all other variables
+to $0$. The corresponding inductive invariant for this solution is
+\begin{align*}
+I'(M)\ ::=&\ 
+(p_2 + q_2 + notbit_1 + notbit_2 + q_3 \ge 1 ) \; \land \\
+&\ (p_2 + p_3 + notbit_1 + notbit_2 + q_2 + q_3 + q_5 \le 2)\,.
+\end{align*}
+% The next section shows how to get a simpler one.
+
+\input{fig/dia_method_invariant_by_refinement}
+

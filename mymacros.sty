@@ -1,6 +1,6 @@
 \ProvidesPackage{mymacros}[2014/04/07 My macros]
 
-%Theorem definitions
+% Theorem definitions
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{thesis}[theorem]{Thesis}
@@ -13,5 +13,45 @@
 
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
+
+% Custom math operators
+\DeclareMathOperator{\false}{\mathit{false}}
+\DeclareMathOperator{\true}{\mathit{true}}
+\DeclareMathOperator{\fin}{fin}
+\newcommand{\set}[1]{{\{ #1 \}}}
+\newcommand{\pre}[1]{\prescript{\bullet}{}{#1}}
+\newcommand{\post}[1]{#1^{\bullet}}
+
+% Other commands
+\newcommand{\supertiny}{\fontsize{4}{5}\selectfont}
+
+% Method names
+\newcommand{\safety}{\textsc{Safety}}
+\newcommand{\safetyref}{\textsc{SafetyByRefinement}}
+\newcommand{\invariant}{\textsc{Invariant}}
+\newcommand{\invariantref}{\textsc{InvariantByRefinement}}
+\newcommand{\invariantwmin}{\textsc{InvariantWithMinimization}}
+\newcommand{\liveness}{\textsc{Liveness}}
+\newcommand{\livenessref}{\textsc{LivenessByRefinement}}
+
+% Tikz styles
+\tikzstyle{place}=[circle,thick,draw=black!75,fill=white!20,
+    minimum size=5mm]
+\tikzstyle{transition}=[rectangle,thick,draw=black!75,
+    fill=black!20,minimum size=5mm]
+\tikzstyle{box}=[fill=black!5, draw=black!75]
+\tikzstyle{flow}=[draw, ->, >=stealth]
+\tikzstyle{state}=[draw, ellipse, aspect=2]
+\tikzstyle{action}=[draw, rectangle, align=center]
+\tikzstyle{decision}=[draw, diamond, aspect=2, align=center]
+\tikzstyle{print}=[draw, trapezium, trapezium left angle=70,
+    trapezium right angle=-70]
+
+% No extra spacing before \paragraph
+\renewcommand{\paragraph}{%
+    \@startsection{paragraph}{4}%
+    {\z@}{0.0ex \@plus 1ex \@minus .2ex}{-1em}%
+    {\normalfont\normalsize\bfseries}%
+}
 
 \endinput
