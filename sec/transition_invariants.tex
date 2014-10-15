@@ -34,7 +34,7 @@ or simply $\neg (dh \land dg)$.
 
 The main idea of method \liveness\ are transition invariants.
 Note that we are using a slighty weaker version of invariants,
-here called T-surinvariants. This allows the method to be
+here called \emph{T-surinvariants}. This allows the method to be
 used on general Petri nets and not only 1-safe nets.
 For a Petri net $N = (P, T, F, m_0)$,
 a vector $X$ of size $|T|$ is
@@ -49,8 +49,8 @@ constraints:
   \end{cases}\,,
 \end{align*}
 where $C$ is the incidence matrix of $N$.
-For a vector $X$ of $|T|$ variables, we define
-its support $\|X\|$ as $\{ t ∈ T \mid X(t) > 0 \}$.
+For a vector $X$ of $|T|$ variables, its \emph{support} is defined
+as $\|X\| = \{ t ∈ T \mid X(t) > 0 \}$.
 
 Semi-positive T-invariants have an interesting property relating to infinite
 occurence sequences (proof adapted from~\cite{EsparzaBruns96}):
@@ -70,7 +70,7 @@ occurence sequences (proof adapted from~\cite{EsparzaBruns96}):
     Every transition in $\inf(\tau)$ needs to appear eventually after
     $m_{i_1}$, so there is an $m_{i_j}$ such that all $t \in \inf(\tau)$
     appear in the subsequence between $m_{i_1}$ and $m_{i_j}$. With
-    $X$ as a vector of transition occurence counts in that subsequence,
+    $X$ as the vector of transition occurence counts in that subsequence,
     we have $\|X\| = \inf(\tau)$, $C X = m_{i_j} - m_{i_1} \ge 0$,
     $X \ge 0$ and $X \ne 0$ as the sequence is not empty.
 \end{proof}
@@ -86,7 +86,7 @@ property $\psi$ by checking if the following constraints are satisfiable:
 
 If the constraints are unsatisfiable, then no infinite occurence
 sequence violates $\psi$ and therefore $N \models \psi$.
-If there a sequence $\tau$ with $\tau \models \neg\psi$,
+If there were a sequence $\tau$ with $\tau \models \neg\psi$,
 then by Lemma~\ref{lem:inf-inv} there is a semi-positive T-surinvariant
 $X$ with $\|X\| = \inf(\tau)$, which would satisfy the constraints.
 

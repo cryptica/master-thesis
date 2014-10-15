@@ -13,7 +13,7 @@ often identify $m$ and the vector $(m(p_1), \ldots, m(p_n))$.
 For a subset $P' ⊆ P$ of places, we write $m(P') = \sum_{p\in P'} m(p)$.
 A \emph{subnet} of a Petri net $(P,T,F,m_0)$ is a tuple $(P',T')$ with
 $P' \subseteq P$ and $T' \subseteq T$.
-The induced flow relation $F'$ of a subnet is the projection of $F$ onto $(P × T) ∪ (T × P)$.
+The induced flow relation $F'$ of a subnet is the projection of $F$ onto $(P' × T') ∪ (T' × P')$.
 
 \paragraph{Pre- and post-set.}
 For $x\in P\cup T$, the \emph{pre-set} is
@@ -60,11 +60,11 @@ A \emph{liveness property} $\psi$ is a boolean constraint over the free variable
 An infinite occurence sequence $\tau$ satisfies $\psi$ (denoted by $\tau \models \psi$)
 iff, with the interpretation $I$ defined as $I(t) := t \in \inf(\tau)$, we have $I \models \psi$.
 A Petri net $N$ satisfies a liveness property $\psi$ (denoted by $N \models \psi$)
-iff for all infinite occurence sequences $\tau$ of $N$, we have $\tau \models \psi$
+iff for all infinite occurence sequences $\tau$ of $N$, we have $\tau \models \psi$.
 In other words, $\psi$ specifies which sets of transitions can occur
 together infinitely often. For example, the property $\psi = \neg (t_1 \land t_2) \lor t_3$
 specifies that there is no sequence where $t_1$ and $t_2$ are fired infinitely often, unless
-$t_3$ is also fired infinitely often. Note that special property $\psi = \false$ is only
+$t_3$ is also fired infinitely often. Note that the special property $\psi = \false$ is only
 satisfied if the net has no infinite firing sequence at all.
 This property can be used to specify termination of the net.
 
