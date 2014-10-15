@@ -2,9 +2,8 @@
 \documentclass[
     12pt,
     a4paper,
-    oneside, %TODO: parge margins
-    listof=leveldown,
-    %DIV11,
+    oneside,
+%    listof=leveldown,
     BCOR5mm,
     parskip
 ]{scrbook}
@@ -37,18 +36,19 @@
 \usepackage{listings}
 \usepackage{algpseudocode}
 \usepackage{booktabs}
+\usepackage{enumitem}
+\setlist{nosep}
 
 % References and appendix
-%\usepackage[hidelinks]{hyperref}
+\usepackage[hidelinks]{hyperref} % TODO: Remove before printing
 \usepackage[autostyle=true]{csquotes}
-\usepackage{hyperref}
 \usepackage[hyperref=true,
     url=false,
     isbn=false,
-    backref=true, % TODO: Remove before printing
+%    backref=true,
     style=alphabetic,
-    %tyle=ieee,
     mincrossrefs=100,
+    maxnames=10,
     backend=biber,
     block=none
 ]{biblatex}
@@ -77,8 +77,15 @@
 \include{cover}
 \include{declaration}
 \tableofcontents
-\listoftables
+
+\begingroup
 \listoffigures
+\let\cleardoublepage\relax
+\let\clearpage\relax
+\listoftables
+\endgroup
+\newpage
+
 \pagenumbering{arabic}
 
 \include{sec/introduction}
@@ -89,7 +96,7 @@
 
 \include{sec/checking_liveness_properties}
 
-\include{sec/implementation}
+%\include{sec/implementation}
 
 \include{sec/experimental_evaluation}
 

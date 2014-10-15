@@ -33,13 +33,13 @@ plus the number of tokens added by the input transitions of $p$, minus
 the number of tokens removed by the output transitions. 
 So, for instance, in Lamport's algorithm the constraint for place $notbit_1$
 is:
-$$notbit_1 = 1 + s_3 + t_5 + t_4 - s_1 - t_4 - t_5 = 1 +s_3
--s_1\,.$$
-
+$$notbit_1 = 1 + s_3 + t_5 + t_4 - s_1 - t_4 - t_5 = 1 +s_3 -s_1\,.$$
 We equip the marking equation with the non-negativity conditions,
 modeling that the number of tokens in a place, or the number of
 occurrences of a transition in an occurrence sequence cannot become
-negative. All together, we get the following set of \emph{marking constraints}:
+negative.
+
+All together, we get the following set of \emph{marking constraints}:
 \begin{align*}
   \mathcal{C}(P, T, F, m_0) ::&
   \begin{cases}
@@ -68,11 +68,15 @@ The method does not work in the other direction: If the constraints
 \eqref{eq:safety} are satisfiable, we cannot conclude that the
 property $\varphi$ is violated.
 
-As an example, consider the Lamport's algorithm. \safety{}
-successfully proves the property ``if process
-1 is at location $p_3$, then ${bit_1}={\true}$'' by showing
-that $\mathcal{C}(P,T,F,m_0) \wedge p_3 \geq 1 \wedge bit_1
-\neq 1$ is unsatisfiable. However, if we apply it to the mutual
+\input{fig/setC}
+
+As an example, consider the Lamport's algorithm.
+We can successfully prove the property ``if process
+1 is at location $p_3$, then ${bit_1}={\true}$''
+with method \safety{} by adding the negation $p_3 \geq 1 \wedge bit_1 \neq 1$
+to the constraints $\mathcal{C}(P,T,F,m_0)$ given in Figure~\ref{fig:setC},
+which makes them unsatisfiable.
+However, if we apply it to the mutual
 exclusion property, i.e.,~check for satisfiability of
 $\mathcal{C}(P,T,F,m_0) \wedge p_3 \geq 1\wedge q_5 \geq 1$, we obtain
 a solution, but we cannot conclude that the mutual exclusion property
@@ -84,7 +88,7 @@ As usual in program analysis, one can solve the constraints over rationals to ge
 of the method. Solving the constraints over rationals will become
 useful in Section~\ref{sec:constructing_invariants}.
 
-%\iffalse
+\iffalse
 
 \begin{verbatim}
 * Method Safety:
@@ -166,7 +170,6 @@ useful in Section~\ref{sec:constructing_invariants}.
     |
     number of tokens in p1
 \end{verbatim}
-%\fi
 
 \begin{verbatim}
 - State constraints C:
@@ -184,4 +187,4 @@ useful in Section~\ref{sec:constructing_invariants}.
      p3 \ge 1 & \land q5 \ge 1
 \end{align*}
 
-%\fi
+\fi

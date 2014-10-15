@@ -1,9 +1,16 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-In recent years many papers have proposed and developed techniques for
-the verification of concurrent software
-\cite{KaiserKW10,GantyM12,BouajjaniE14,KaiserKW12,DOsualdoKO13}.
+For program analysis and verification, there are essentially  two different
+types of properties, \emph{safety} and \emph{liveness} properties~\cite{Lamport77}.
+Safety properties state that nothing bad ever happens, while liveness properties
+state that something good eventually happens~\cite{AlpernSchneider85}.
+For example, never reaching an error state or a deadlock in a program are
+safety properties, while termination or fairness are liveness properties.
+
+Especially for the verification of safety properties of concurrent software, many
+papers have proposed and developed techniques 
+in the recent years~\cite{KaiserKW10,GantyM12,BouajjaniE14,KaiserKW12,DOsualdoKO13}.
 In particular, model checkers based on Petri net coverability have been successfully applied.  
 Petri nets are a simple and natural automata-like model for concurrent systems, and 
 can model certain programs with an unbounded
@@ -13,7 +20,7 @@ models the number of threads that are currently at that location. This
 point was first observed in~\cite{GermanS92}, and later revisited in
 \cite{DelzannoRB02} and, more implicitly, in~\cite{KaiserKW10,GantyM12}.
 
-The problem whether at least one thread can reach a given program
+The safety problem, i.e.\ whether at least one thread can reach a given program
 location (modelling some kind of error), naturally reduces to the
 \emph{coverability problem} for Petri nets: given a net $N$ and a marking
 $M$, decide whether some reachable marking of $N$ \emph{covers} $M$,
@@ -21,11 +28,12 @@ i.e., puts at least as many tokens as $M$ on each place. While the
 decidability and EXPSPACE-completeness of the coverability problem
 were settled long ago~\cite{KarpM69,Rackoff78}, new algorithmic ideas
 have been developed in recent years
-\cite{GeeraertsRB06,GantyRB08,ValmariH14,KaiserKW12,KloosMNP13}. The techniques are based on forward or backward state-space 
+\cite{GeeraertsRB06,GantyRB08,ValmariH14,KaiserKW12,KloosMNP13}.
+The techniques are based on forward or backward state-space 
 exploration, which is accelerated in a number of ways in order to cope 
 with the possibly infinite number of states.
 
-In this paper we revisit an approach to the coverability problem based
+Here we will revisit an approach to the coverability problem based
 on classical Petri net analysis techniques: the marking equation and
 traps~\cite{Murata89,Reisig13}.
 The marking equation is a system of linear constraints that can be
@@ -34,27 +42,71 @@ overapproximates the set of reachable markings. This system
 can be supplemented with linear constraints specifying a set of unsafe
 markings, and solved using standard linear or integer programming. If
 the constraints are infeasible, then all reachable markings are safe. If
-not, then one can try different aproaches. In~\cite{EsparzaMelzer00}
+not, then one can try different approaches. In~\cite{EsparzaMelzer00}
 a solution of the constraints is used to derive an additional constraint 
 in the shape of a \emph{trap}: a set of places that, loosely speaking, once 
-marked cannot be ``emptied''; the process can be iterated. More recently,
+marked cannot be ``emptied''; the process can be iterated.
+More recently,
 in~\cite{WimmelWolf12}, Wimmel and Wolf propose to use the solution to guide a
 state space exploration searching for an unsafe marking; if the search fails, 
 then information gathered during it is used to construct an additional
-constraint. 
+constraint.
+Our methods and results for coverability were shown
+in~\cite{EsparzaLMMN14} and will be used in this thesis.
+Additionally, we will test some other safety properties besides coverability.
 
-Constraint-based techniques, while known for a while, have always
+The liveness problem instead asks whether a program always reaches some good state.
+For that, one one needs to look at infinite executions.
+A traditional approach is the automata-theoretic approach~\cite{VardiWolper86}
+using LTL and Büchi automata.
+This has been applied to 1-safe Petri nets by Esparza and Melzer~\cite{EsparzaMelzer97}
+in the form of \emph{Büchi nets}.
+The problem is reduced to deciding emptiness of the Büchi net, i.e.\ checking if the net
+has an infinite accepting run. For 1-safe nets, this was shown to be PSPACE-complete.
+However, similar to the marking equation, the infinite runs can be
+overapproximated by \emph{semi-positive T-invariants} to check liveness~\cite{EsparzaBruns96}.
+In~\cite{EsparzaMelzer97} this has been refined to \emph{$T^\star$-invariants} by using
+\emph{S-components}~\cite{DeselEsparza95}.
+We will use the constraint-based approach described there and
+and apply it to general Petri nets.
+
+%Safety The safety property basically states that bad things never happens. The
+%definition of a ”bad thing” varies depending on the system but in general it holds
+%that a system violates the safety property if it enters an illegal state. Formally, for
+%a system S where the state α represents deadlock. Safety with respect to α is the
+%assertion that α is false for all states reachable from an initial state S 0.
+
+%Liveness The liveness property states that ”something good eventually happens”
+%which means that the system, at some, point will reach a desired state. Since the
+%property works with infinite time as displayed by the use of ”eventually”, there is
+%no way of disproving a system. Formally the liveness property can be summarized
+%with the following. For a system S where β is a desirable state, β is true for some
+%state reachable from S 0. Therefore the liveness property is often split into parts that
+%can be proved separately. If true the system should enter a desired state at some
+%point of the execution. Common parts that will be necessary for our further proof
+%is stated below.
+%• Fairness: This property states that every process should be executed infinitely
+%often.
+%• Termination: The property states that from an initial state every behavior of
+%the system leads to a configuration where all the guards (all execution paths
+%is locked in there final state) are false.
+
+Both the safety and liveness analysis can be done with
+constraint-based techniques. While these are known for a while, they have always
 suffered from the absence of efficient decision procedures for 
 linear arithmetic together with Boolean satisfiability.  
 Profiting from recent advances in SMT-solving
-technology, we reimplement the technique of~\cite{EsparzaMelzer00}
+technology, we reimplement the techniques of~\cite{EsparzaMelzer00}
+and~\cite{EsparzaMelzer97}
 on top of the Z3 SMT solver~\cite{MouraB08}, and apply it to a large 
 collection of benchmarks.
 
-The technique is theoretically incomplete, i.e., the set of linear 
+The techniques are theoretically incomplete, i.e., the set of linear 
 constraints derived from the marking equation and traps may be 
 feasible even if all reachable markings are safe.
-Our first and surprising finding is that, despite this fact, the technique
+Also the T-invariant-based liveness technique with S-components may not prove all
+properties.
+Surprisingly we find that, despite this fact, the safety technique
 is powerful enough to prove safety of 96 out of a total
 of 115 safe benchmarks gathered from current research papers in concurrent software verification. 
 In contrast, three different state-of-the-art tools for coverability
@@ -62,8 +114,11 @@ proved only 61, 51, or 33 of these 115 cases!
 Moreover, and possibly due to the characteristics of the
 application domain, even the simplest version of the
 technique—based on the marking equation—is successful in 84 cases.
+With the liveness technique, we can prove termination in
+1834 of 1836 cases on two sets of industrial business process models.
+We also perform well on two scalable typical examples. 
 
-As a second contribution, and inspired
+As an additional contribution, and inspired
 by work on interpolation, we show that a dual version of the classical
 set of constraints, equivalent in expressive power, can be used not
 only to check safety, but to produce an inductive invariant.

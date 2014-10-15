@@ -1,65 +1,225 @@
 \section{Transition invariants}
 \label{sec:transition_invariants}
 
-\begin{definition}[Transition invariant]
-A \emph{transition invariant} (also \emph{T-invariant}) of
-a Petri net is a firing vector $X$ with
-$$
-CX = 0.
-$$
-\end{definition}
+We will now introduce the method \liveness, which uses
+a variant of semi-positive transition invariants~\cite{EsparzaBruns96}
+to prove liveness properties. As an example, consider the
+asynchronous program given in Figure~\ref{fig:asynchronous_src}.
+Here, the $\algPost$ command is a non-blocking operation for
+launching a process in parallel. Assume there is a scheduler
+executing the processes in a non-deterministic order.
+Initially, the process $\textsc{Main}$ is executed, which
+sets $x$ to $true$ and launches $\textsc{H}$.
+Process $\textsc{H}$ launches new instances of $\textsc{H}$
+and $\textsc{G}$ until $\textsc{G}$ sets $x$ to $\false$.
+Assuming a fair scheduler, i.e.\ one that will execute each process
+eventually, the program should terminate. This
+\emph{fair termination} is the liveness
+property we will want to prove.
 
-\begin{definition}[Quasi transition invariant]
-A \emph{semi-positve quasi transition invariant} of
-a Petri net is a firing vector $X$ with
+\input{fig/asynchronous_src}
+
+Transforming the net into a Petri net gives us the net in
+Figure~\ref{fig:asynchronous_net}. It has an added scheduler
+$s$, pending instances $ph$ and $pg$, transitions for
+dispatching processes $dh$ and $dg$ and exiting the processes
+depending on the truth value of $x$.
+If the scheduler is fair and continues dispatching instances
+$\textsc{H}$ and $\textsc{G}$ 
+infinitely, the program should terminate, giving us as the
+the liveness property $\psi = (dh \land dg \implies \false)$
+or simply $\neg (dh \land dg)$.
+
+\input{fig/asynchronous_net}
+
+The main idea of method \liveness\ are transition invariants.
+Note that we are using a slighty weaker version of invariants,
+here called T-surinvariants. This allows the method to be
+used on general Petri nets and not only 1-safe nets.
+For a Petri net $N = (P, T, F, m_0)$,
+a vector $X$ of size $|T|$ is
+called a \emph{semi-positive T-surinvariant} if it satisfies the following
+constraints:
 \begin{align*}
-CX &≥ 0 \\
- X &≥ 0 \\
- X &≠ 0.
+  \mathcal{T}(P, T, F, m_0) ::&
+  \begin{cases}
+    C X \ge 0 & \text{T-surinvariant} \\
+      X \ge 0 & \text{non-negativity conditions} \\
+      X \ne 0 & \text{non-zero condition} \\
+  \end{cases}\,,
 \end{align*}
-\end{definition}
+where $C$ is the incidence matrix of $N$.
+For a vector $X$ of $|T|$ variables, we define
+its support $\|X\|$ as $\{ t ∈ T \mid X(t) > 0 \}$.
 
+Semi-positive T-invariants have an interesting property relating to infinite
+occurence sequences (proof adapted from~\cite{EsparzaBruns96}):
 \begin{lemma}
-    If a Petri net has an infinite firing sequence $σ$, then
-    there is a solution $X$ to the constraints $C_T$
-    with $X(t) > 0 \iff t ∈ \inf(σ)$.
+\label{lem:inf-inv}
+    If a Petri net $N$ has an infinite occurence sequence $\tau$, then
+    there is a semi-positive T-surinvariant $X$ such that
+    $\|X\| = \inf(\tau)$.
 \end{lemma}
 \begin{proof}
-    Let $m_0 \xrightarrow{σ}$ be the infinite firing sequence.
-    A certain set of transitions in $σ$ only fire finitely often,
-    after which the remaining transitions all fire infinitely often.
-    Therefore the sequence can be decomposed into a finite part $σ_0$ and
-    an infinite part $σ'$ such that $σ=σ_0σ'$,
-    $\inf(σ') = \inf(σ)$ and $\fin(σ') = \emptyset$.
-
-    With this we have $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1}$.
-
-    With this we have
-    $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1} m_2 \xrightarrow{σ''}$
-    with $σ=σ_0σ_1σ_2σ''$ and $m_2 ≥ m_1$.
-    As $σ_1$ is not empty, we have $X_{σ_1} ≠ 0$ and $X_{σ_1} ≥ 0$.
-    and as $m_2 = m_1 + CX$, we have $CX = m_2 - m_1 ≥ 0$.
-    Therefore $X_{σ_1}$ is a solution to the constraints $C_T$ and
-    $X_{σ_1}(t) > 0 \iff t ∈ \fin(σ_1) \iff t ∈ \inf(σ)$.
+    Let $\tau' = m_k \xrightarrow{t_{k+1}} m_{k+1} \xrightarrow{t_{k+2}} m_{k+2} \ldots$ be
+    a suffix of $\tau$ such that every transition of $N$ appears either
+    never or infinitely often in $\tau'$. The sequence $m_k m_{k+1} m_{k+2} \ldots$
+    is an infinite sequence of distinct $|P|$-tuples of natural numbers.
+    By Dickson's lemma~\cite{Dickson13}, this sequence contains an
+    infinite subsequence $m_{i_1} \le m_{i_2} \le m_{i_3} \le \ldots$.
+    Every transition in $\inf(\tau)$ needs to appear eventually after
+    $m_{i_1}$, so there is an $m_{i_j}$ such that all $t \in \inf(\tau)$
+    appear in the subsequence between $m_{i_1}$ and $m_{i_j}$. With
+    $X$ as a vector of transition occurence counts in that subsequence,
+    we have $\|X\| = \inf(\tau)$, $C X = m_{i_j} - m_{i_1} \ge 0$,
+    $X \ge 0$ and $X \ne 0$ as the sequence is not empty.
 \end{proof}
+The reverse does not always hold. For a semi-positive T-surinvariant $X$,
+if there exists an infinite occurence sequence $\tau$ with $\|X\| = \inf(\tau)$,
+we will call $X$ \emph{realisable}.
 
-\begin{definition}
-For a liveness property $ψ$, the corresponding constraint
-$C_ψ$ is given by
-\begin{align*}
-    C_t           &:= t > 0 \\
-    C_{\neg ψ}    &:= \neg C_ψ \\
-    C_{ψ \land φ} &:= C_ψ \land C_φ \\
-    C_{ψ \lor φ}  &:= C_ψ \lor C_φ
-\end{align*}
-\end{definition}
+Method \liveness\ checks if a Petri net $N$ satisfies a liveness
+property $\psi$ by checking if the following constraints are satisfiable:
+\begin{equation}\label{eq:liveness}
+  \mathcal{T}(P, T, F, m_0) \land \neg\psi(\|X\|)
+\end{equation}
 
-\begin{theorem}
-    For a Petri net $N$ and a liveness property $ψ$,
-    If there is no solution to the constraints $C_T \cup \{ C_{¬ψ} \}$,
-    then $N \models ψ$.
-\end{theorem}
-\begin{proof}
-    Assume there is an infinite firing sequence $σ$ such that
-    $σ \models Ψ$.
-\end{proof}
+If the constraints are unsatisfiable, then no infinite occurence
+sequence violates $\psi$ and therefore $N \models \psi$.
+If there a sequence $\tau$ with $\tau \models \neg\psi$,
+then by Lemma~\ref{lem:inf-inv} there is a semi-positive T-surinvariant
+$X$ with $\|X\| = \inf(\tau)$, which would satisfy the constraints.
+
+%\begin{theorem}
+%    If a Petri net $N$ satisfies a liveness property $\psi$,
+%    then $N$ has an infinite occurence sequence $\tau$, then
+%    there is a semi-positive T-invariant $X$ such that
+%    $\|X\| = \inf(\tau)$.
+%\end{theorem}
+
+Consider the Petri net for the asynchronous program from
+Figure~\ref{fig:asynchronous_net}.
+The constraints $\mathcal{T}(P, T, F, m_0)$ for the net are
+given in Figure~\ref{fig:setT}. However, when combined with
+the negation for the fair termination property
+$\neg\psi = dh \land dg$, which would translate to the constraints
+$\mathcal{T}(P, T, F, m_0) \land dh > 0 \land dg > 0$, they are still satisfiable,
+for example by assigning $dg = dh = gf = gt = 1$ and $gt = hf = 0$.
+Therefore we cannot prove that the property holds.
+
+\input{fig/setT}
+
+%Method \safety{} for checking that a property $\varphi$ is
+%invariant for a Petri net $N=(P,T,F,m_0)$ consists of checking for
+%satisfiability of the constraints
+%\begin{equation}\label{eq:safety}
+%\mathcal{C}(P,T,F,m_0) \wedge \lnot \varphi(M)\,.
+%\end{equation}
+%If the constraints are unsatisfiable, then no reachable marking
+%violates $\varphi$. To see that this is true, consider the converse:
+%If there exists an occurrence sequence $m_0
+%\xrightarrow{\sigma} m$ leading to a marking $m$ that violates the
+%property, then we can construct a valuation of the variables that assigns $m(p)$ to
+%$M(p)$ for each place $p$, and the number of occurrences of $t$ in
+%$\sigma$ to $X(t)$ for each transition $t$. This valuation then
+%satisfies the constraints.
+
+%We now recall a well-known method, which we call \safety, that provides a sufficient
+%condition for a given Petri net $N$ to satisfy a property $\varphi$ 
+%by reducing the problem to checking satisfiability of a linear arithmetic formula.
+%We illustrate the method on Lamport's 1-bit algorithm for mutual
+%exclusion. 
+
+
+
+%Before going into details, we state several conventions. For a
+%Petri net $N = (P, T, F, m_0)$, we introduce a vector of
+%$|P|$ variables $M$, and a vector of $|T|$ variables $X$.
+%The vectors $M$ and $X$ will be used to represent the current
+%marking and the number of occurrences
+%of transitions in the occurrence sequence leading to the current marking, respectively.
+%If a place or a transition is given a specific
+%name, we use the same name for its associated variable. Given a place
+%$p$, the intended meaning of a constraint like $p \geq 3$ is 
+%``at the current marking place $p$ must have at least 3 tokens.'' 
+%Given a transition $t$, the intended meaning of a constraint like $t \leq 2$ is ``in
+%the occurrence sequence leading to the current marking, transition $t$
+%must fire at most twice.'' 
+
+%The key idea of the \safety{} method lies in the \emph{marking
+%  equation}:
+%$$M = m_0 + C X\,,$$
+%where the incidence matrix $C$ is a $|P| \times |T|$ matrix given by
+%$$C(p,t) = F(t,p) - F(p,t)\,.$$
+%For each place $p$, the marking equation contains a constraint
+%that formulates a simple token conservation law: the number of tokens in
+%$p$ at the current marking is equal to the initial number of tokens $m_0(p)$,
+%plus the number of tokens added by the input transitions of $p$, minus
+%the number of tokens removed by the output transitions. 
+%So, for instance, in Lamport's algorithm the constraint for place $notbit_1$
+%is:
+%$$notbit_1 = 1 + s_3 + t_5 + t_4 - s_1 - t_4 - t_5 = 1 +s_3
+%-s_1\,.$$
+
+%\begin{definition}[Transition invariant]
+%A \emph{transition invariant} (also \emph{T-invariant}) of
+%a Petri net is a firing vector $X$ with
+%$$
+%CX = 0.
+%$$
+%\end{definition}
+
+%\begin{definition}[Transition surinvariant]
+%A \emph{semi-positve transition surinvariant} of
+%a Petri net is a firing vector $X$ with
+%\begin{align*}
+%CX &≥ 0 \\
+% X &≥ 0 \\
+% X &≠ 0.
+%\end{align*}
+%\end{definition}
+
+%\begin{lemma}
+%    If a Petri net has an infinite firing sequence $σ$, then
+%    there is a solution $X$ to the constraints $C_T$
+%    with $X(t) > 0 \iff t ∈ \inf(σ)$.
+%\end{lemma}
+%\begin{proof}
+%    Let $m_0 \xrightarrow{σ}$ be the infinite firing sequence.
+%    A certain set of transitions in $σ$ only fire finitely often,
+%    after which the remaining transitions all fire infinitely often.
+%    Therefore the sequence can be decomposed into a finite part $σ_0$ and
+%    an infinite part $σ'$ such that $σ=σ_0σ'$,
+%    $\inf(σ') = \inf(σ)$ and $\fin(σ') = \emptyset$.
+%
+%    With this we have $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1}$.
+%
+%    With this we have
+%    $m_0 \xrightarrow{σ_0} m_1 \xrightarrow{σ_1} m_2 \xrightarrow{σ''}$
+%    with $σ=σ_0σ_1σ_2σ''$ and $m_2 ≥ m_1$.
+%    As $σ_1$ is not empty, we have $X_{σ_1} ≠ 0$ and $X_{σ_1} ≥ 0$.
+%    and as $m_2 = m_1 + CX$, we have $CX = m_2 - m_1 ≥ 0$.
+%    Therefore $X_{σ_1}$ is a solution to the constraints $C_T$ and
+%    $X_{σ_1}(t) > 0 \iff t ∈ \fin(σ_1) \iff t ∈ \inf(σ)$.
+%\end{proof}
+
+%\begin{definition}
+%For a liveness property $ψ$, the corresponding constraint
+%$C_ψ$ is given by
+%\begin{align*}
+%    C_t           &:= t > 0 \\
+%    C_{\neg ψ}    &:= \neg C_ψ \\
+%    C_{ψ \land φ} &:= C_ψ \land C_φ \\
+%    C_{ψ \lor φ}  &:= C_ψ \lor C_φ
+%\end{align*}
+%\end{definition}
+
+%\begin{theorem}
+%    For a Petri net $N$ and a liveness property $ψ$,
+%    If there is no solution to the constraints $C_T \cup \{ C_{¬ψ} \}$,
+%    then $N \models ψ$.
+%\end{theorem}
+%\begin{proof}
+%    Assume there is an infinite firing sequence $σ$ such that
+%    $σ \models Ψ$.
+%\end{proof}

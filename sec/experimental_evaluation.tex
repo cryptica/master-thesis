@@ -3,27 +3,33 @@
 
 We implemented our algorithms in a tool called
 \emph{Pe\-tri\-ni\-zer}. 
-Petrinizer is implemented as a script on top of the 
+Petrinizer is implemented as a script
+on top of the Z3 SMT solver~\cite{MouraB08}.
 % combination of Bash and Prolog scripts,
-Z3 SMT solver~\cite{MouraB08}.
-It takes as input coverability problem instances encoded in the MIST
-input format\footnote{\url{https://github.com/pierreganty/mist}}, and it
-runs one of the selected methods. 
-We implemented all possible combinations of
-methods: with and without trap refinement, with rational and integer arithmetic,
-with and without invariant construction, with and without invariant
-minimization.
+It takes its input in several formats, among them
+coverability problem instances encoded in the MIST
+input format\footnote{\url{https://github.com/pierreganty/mist}},
+Petri nets in the
+LoLA format\footnote{\url{http://service-technology.org/lola/}} and
+nets in the TPN format\footnote{\url{http://www.win.tue.nl/~hverbeek/doku.php?id=projects:prom:plug-ins:import:tpn}}.
+It then runs the methods for proving safety or liveness properties
+with applicable options:
+with or without refinement, with rational or integer arithmetic,
+with or without invariant construction, with or without invariant
+minimization. It also supports implicit property generation for
+certain properties such as termination, deadlock-freeness or 1-safeness.
 
 Our evaluation had two main goals. First, as the underlying
 methods are incomplete, we wanted to measure their success rate on standard
-benchmark sets. 
+benchmark sets.
 As a subgoal, we wanted to investigate
-the usefulness and necessity of traps, the benefit of using integer arithmetic
+the usefulness and necessity of traps and S-components,
+the benefit of using integer arithmetic
 over rational arithmetic, and the sizes of the constructed invariants.
 The second goal was to measure Petrinizer's performance and to compare it
-with state-of-the-art tools: 
+with state-of-the-art tools:
 IIC~\cite{KloosMNP13}, BFC\footnote{The most recent version of BFC at the time of
-writing the paper was 2.0. However, we noticed it sometimes reports
+writing was 2.0. However, we noticed it sometimes reports
 inconsistent results, so we used version 1.0 instead. The tool can be
 obtained at \url{http://www.cprover.org/bfc/}.}~\cite{KaiserKW12}, and
 MIST\footnote{MIST consists of several methods, most of them based on
@@ -31,12 +37,13 @@ MIST\footnote{MIST consists of several methods, most of them based on
   refinement method that tries to minimize the number of places in the
   Petri net~\cite{GantyRB08}.}.
 
-\paragraph{Benchmarks.} For the inputs used in the experiments, we collected 
-coverability problem instances originating from various sources. The
-collection contains 178 examples, out of which 115 are safe, and is
-organized into five example suites. The first suite is a collection of
+\paragraph{Benchmarks.} For the first set of benchmarks, we collected
+coverability problem instances originating from various sources.
+The collection contains 176 examples of nets with designated safety properties,
+out of which 115 are safe, and is organized into five example suites.
+The first suite is a collection of
 Petri net examples from the MIST toolkit. This suite contains a
-mixture of 29 examples, both safe and unsafe. It contains both real-world and
+mixture of 27 examples, both safe and unsafe. It contains both real-world and
 artificially created examples. The second suite consists of 46 Petri nets
 that were used in the evaluation of BFC~\cite{KaiserKW12}. They
 originate from the analysis of concurrent C programs, and they are mostly
@@ -53,13 +60,57 @@ this suite, 38 are safe. This suite also contains the largest example in the
 collection, with 66,950 places and 213,635 transitions.
 For our evaluation, only the 115 safe instances are interesting.
 
+Another collection of benchmarks are workflow nets coming from business models.
+Workflow nets are a subclass of Petri nets that have a designated
+final marking and are often used to model business processes~\cite{Aalst03}.
+The first suite is a collection of
+SAP reference models~\cite{DongenJVA07} and contains 590 benchmarks.
+The second suite consists of IBM business process models~\cite{FahlandFJKLVW09} and
+contains 1386 examples.
+These nets do not specify a certain safety or liveness property,
+but there are some interesting properties that can be analysed.
+
+The first property is \emph{termination}, as a workflow should not contain infinite loops.
+Proving this property rules will also rule out livelocks.
+Second, the processes should be \emph{deadlock-free} to not get stuck in an intermediate state.
+For a Petri net $(P,T,F,m_0)$, this means that in every reachable marking, at least one transition is enabled, i.e.\ $\forall m_0 \xrightarrow{\sigma} m : \bigvee_{t ∈ T} \bigwedge_{p ∈ \pre{t}}
+m(p) \ge F(p,t)$. For workflow nets, the final marking may be deadlocked, so
+we need to exclude that state when specifying the property.
+Lastly, we will check if the nets are \emph{1-safe}, i.e.\ all places never have more than
+one token.
+These three properties are not only relevant for workflow nets, so we will check
+the collection of coverability benchmarks for these properties as well.
+
+Finally, for evaluating performance of the liveness analysis, we take two
+typical distributed algorithms as examples that can be scaled in size.
+One is the leader election algorithm by Chang and Roberts~\cite{ChangRoberts79}.
+Here $n$ processes, each having a unique number, are arranged on a unidirectional
+ring network and need to elect a leader by communicating with asynchronous messages.
+When modeled as a Petri net, due to each of the $n$ processes being able to send
+$n$ different messages, the size of the net is in $O(n^2)$. The net also contains
+a transition to reset the system once a leader has been elected.
+The liveness property we want to prove is that a leader will be elected infinitely
+often.
+
+The other algorithm is the snapshot algorithm by Bougé~\cite{Bouge87}.
+This algorithm has $n$ processes on a ring structure which communicate
+through synchronous messages and a monitor process.
+Each process may initiate the generation of a snapshot, after which
+the other processes sample their local states and send them to
+the monitor process, where they are collected into a global snapshot.
+While the original algorithm allowed the processes to perform unrelated
+commands before initiating a snapshot, this has been removed in this
+example to force initiation.
+After initiating a snapshot, a process may still perform those commands.
+Again, after a snapshot has been taken, the system will be reset.
+The liveness property to prove is that a snapshot will be taken infinitely often.
+
 \begin{table}[t]
   \centering
-  \caption[Safe examples that were successfully proved safe.] 
+  \caption[Safe examples that were successfully proved safe.]
     {Safe examples that were successfully proved safe. Symbols
      $\mathbb{Q}$ and $\mathbb{Z}$ denote rational and integer numbers.}
 \label{table:rate-of-success}
-  \scriptsize
   \begin{tabular}{lrrrrrrrr}
     \toprule
     \multicolumn{1}{c}{Suite} &
@@ -72,20 +123,23 @@ For our evaluation, only the 115 safe instances are interesting.
     \multicolumn{1}{c}{MIST} &
     \multicolumn{1}{c}{Total} \\
     \midrule
-    MIST        & 14 & 14& 20 & 20 & {\textbf 23} & 21 & 19 & 23 \\
-    BFC          & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & {\textbf 2} & 2 \\
-    Medical      & 4 & 4 & 4 & 4 & 9 & {\textbf 12} & 10 & 12 \\
-    Bug-tracking & {\textbf 32} & {\textbf 32} & {\textbf 32} & {\textbf 32} & 0 & 0 & 0 & 40 \\
-    Erlang       & 32 & 32 & 36 & {\textbf 38} & 17 & 26 & 2 & 38 \\
+    MIST         & 14 & 14& 20 & 20 & \textbf{23} & 21 & 19 & 23 \\
+    BFC          & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{2} & 2 \\
+    Medical      & 4 & 4 & 4 & 4 & 9 & \textbf{12} & 10 & 12 \\
+    Bug-tracking & \textbf{32} & \textbf{32} & \textbf{32} & \textbf{32} & 0 & 0 & 0 & 40 \\
+    Erlang       & 32 & 32 & 36 & \textbf{38} & 17 & 26 & 2 & 38 \\
     \midrule
-    Total        & 84 & 84 & 94 & {\textbf 96} & 51 & 61 & 33 & 115 \\
+    Total        & 84 & 84 & 94 & \textbf{96} & 51 & 61 & 33 & 115 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \paragraph{Rate of success on safe examples.}
-As shown in Table~\ref{table:rate-of-success}, even with the weakest of the
-methods ---safety based on marking equation over rationals--- Petrinizer is
+In Table~\ref{table:rate-of-success}, we show the success rates
+of Petrinizer in different configurations and other tools
+on the coverability benchmark.
+Even with the weakest of the
+methods—safety based on marking equation over rationals—Petrinizer is
 able to prove safety for 84 out
 of 115 examples. Switching to integer arithmetic does not help: the number of
 examples proved safe remains 84. 
@@ -107,6 +161,55 @@ Furthermore, using traps and integer arithmetic, Petrinizer successfuly proved
 safety for all safe Erlang examples. We find this result particularly
 surprising, as the original verification problems for these examples seem non-trivial.
 
+\begin{table}[t]
+  \centering
+  \caption[Success rate for proving different properties.] 
+  {Success rate for proving different properties.
+   For each property, $x$/$y$ denotes that there are $y$ benchmarks
+   having that property and we can prove it in $x$ cases. In cases
+   where $y$ is a range, the number could not be uniquely determined.}
+\label{table:rate-of-success-misc}
+    \begin{tabular}{lrr@{/}rrr@{/}rrr@{/}rr}
+    \toprule
+    \multicolumn{1}{c}{Suite} &
+    \multicolumn{3}{r}{Termination} &
+    \multicolumn{3}{r}{Deadlock-free} &
+    \multicolumn{3}{r}{1-safe} &
+    \multicolumn{1}{c}{Total} \\
+    \midrule
+    SAP          & &  571 &   572 & &   3 &    3 & & 350 &   350 &  590 \\
+    IBM          & & 1263 &  1264 & \hspace{0.7cm} & 833 & 833 & \hspace{0.2cm} & 992 & 993 & 1386 \\
+    \midrule
+    Total workflow nets  & & 1834 &  1836 & & 836 &  836 & & 1342 & 1343 & 1976 \\
+    \midrule
+    \midrule
+    MIST         & &    0 &     1 & &  23 &   23 & &  12 &    13 &   27 \\
+    BFC          & &    0 &  1–27 & &   2 & 2–30 & &   0 &     0 &   46 \\
+    Erlang       & &   27 & 27–46 & &   0 &  0–3 & &  19 & 19–21 &   50 \\
+    \midrule
+    Total coverability nets  & & 27 & 28–73 & &  25 & 25–56 & & 31 & 32–34 & 123 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The results for the workflow nets and different properties on the coverability nets
+are shown in Table~\ref{table:rate-of-success-misc}.
+For the SAP and IBM suite, Petrinizer is very successful: we can prove
+termination in all but 2 from 1836 cases, deadlock-freeness in all 836 cases
+and 1-safeness in all but 1 of 1343 cases. Switching off refinement only lowers
+the number for 1-safe nets by 3, the others remain the same.
+In any case, the success rate is close to complete coverage, which is a very good
+result.
+
+When proving these properties on the coverability nets, there is the problem
+of not knowing how many nets actually have that property. Even when combining all the
+other tools, we can not get a conclusive answer, due to the tools reaching
+a resource limit on many nets. The medical und bug-tracking suite were
+left out as none of their properties could be determined.
+Still, in cases where we can determine which properties hold, for example 1-safeness,
+Petrinizer can prove the property in most cases.
+
+
 \begin{figure}[t]
   \centering
   \input{fig/petrinizer_various}
@@ -127,7 +230,7 @@ surprising, as the original verification problems for these examples seem non-tr
 
 \paragraph{Invariant sizes.} 
 We measure the size of inductive invariants produced by Pe\-tri\-ni\-zer without
-minimization.
+minimization on the coverability benchmarks.
 We took the number of atomic (non-zero) terms appearing in an invariant's linear expressions
 as a measure of its size. When we relate sizes of invariants to number of places
 in the corresponding Petri net (top left graph in Fig.~\ref{fig:petrinizer-various}), we
@@ -157,7 +260,6 @@ are never larger, and are often orders of magnitude smaller.
   set to the timeout value of 100,000 s. Symbols
   $\mathbb{Q}$ and $\mathbb{Z}$ denote rational and integer numbers.}
 \label{table:mean-median-times}
-  \scriptsize
   \begin{tabular}{lrrrrrr}
     \toprule
     Method/tool & Safety/$\mathbb{Q}$ & Safety/$\mathbb{Z}$ & Ref./$\mathbb{Q}$ &
@@ -170,9 +272,9 @@ are never larger, and are often orders of magnitude smaller.
     Median (all)  & 0.44 & 0.43 & 0.90 & 0.93 & 0.66 & 1.00 \\
     \bottomrule
   \end{tabular}
-  
+
   \vspace{1ex}
-  
+
   \begin{tabular}{lrrrrr}
     \toprule
     Method/tool &
@@ -187,15 +289,17 @@ are never larger, and are often orders of magnitude smaller.
   \end{tabular}
 \end{table}
 
-\paragraph{Performance.} To ensure accuracy and fairness, all experiments were
+\paragraph{Performance.} %First we compare on the coverability benchmarks.
+To ensure accuracy and fairness, all experiments were
 performed on identical machines, equipped with Intel Xeon 2.66 GHz CPUs and 48 GB of memory, running Linux 3.2.48.1
 in 64-bit mode. Execution time was limited to 100,000 seconds (27
 hours, 46 minutes and 40 seconds), and memory to 2 GB\@.
 
 Due to dissimilarities between the compared tools, selecting a fair
 measure of time was non-trivial. On the one hand, as
-Petrinizer communicates with Z3 via temporary files, it spends a
-considerable amount of time doing I/O operations.  On the other hand,
+Petrinizer communicates with Z3, it spends a
+considerable amount of time doing I/O operations.
+On the other hand,
 as BFC performs both a forward and a backward search, it naturally
 splits the work into two threads, and runs them in parallel on two CPU
 cores. In both cases, the actual elapsed time does not quite
@@ -206,8 +310,88 @@ the total CPU time spent executing the process and its children. In
 the case of Petrinizer, it excludes the I/O overhead, and in the case
 of BFC, it includes total CPU time spent on both CPU cores.
 
-We report mean and median times measured for each tool in
-Table~\ref{table:mean-median-times}.
+For the coverability benchmarks, We report mean and median times measured for each tool in
+Table~\ref{table:mean-median-times} with different configurations for Petrinizer.
+
+\begin{table}[t]
+  \centering
+  \caption{Performance on the leader election algorithm by Chang and Roberts~\cite{ChangRoberts79}.}
+\label{table:performance-leader-election}
+    \begin{tabular}{rrrrrr}
+    \toprule
+    \multicolumn{1}{c}{$n$} &
+    \multicolumn{1}{c}{$|P|$} &
+    \multicolumn{1}{c}{$|T|$} &
+    \multicolumn{1}{c}{Time (s)} &
+    \multicolumn{1}{c}{Memory (MB)} &
+    \multicolumn{1}{c}{Refinements} \\
+    \midrule
+     10 &   201 &   201 &  0.03 &  13.70 & 0 \\
+     20 &   801 &   801 &  0.16 &  15.38 & 0 \\
+     30 &  1801 &  1801 &  0.44 &  24.64 & 0 \\
+     40 &  3201 &  3201 &  0.91 &  39.29 & 0 \\
+     50 &  5001 &  5001 &  1.72 &  56.40 & 0 \\
+     60 &  7201 &  7201 &  2.77 &  75.70 & 0 \\
+     70 &  9801 &  9801 &  4.89 & 103.68 & 0 \\
+     80 & 12801 & 12801 &  7.42 & 132.34 & 0 \\
+     90 & 16201 & 16201 & 12.46 & 189.00 & 0 \\
+    100 & 20001 & 20001 & 28.15 & 198.58 & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \caption{Performance on the snapshot algorithm by Bougé~\cite{Bouge87}.}
+\label{table:performance-snapshot}
+    \begin{tabular}{rrrrrr}
+    \toprule
+    \multicolumn{1}{c}{$n$} &
+    \multicolumn{1}{c}{$|P|$} &
+    \multicolumn{1}{c}{$|T|$} &
+    \multicolumn{1}{c}{Time (s)} &
+    \multicolumn{1}{c}{Memory (MB)} &
+    \multicolumn{1}{c}{Refinements} \\
+    \midrule
+     10 &  60 &  51 &   0.89 & 14.72 &  10 \\
+     20 & 120 & 101 &   3.77 & 17.37 &  20 \\
+     30 & 180 & 151 &   8.10 & 19.74 &  30 \\
+     40 & 240 & 201 &  16.57 & 23.14 &  40 \\
+     50 & 300 & 251 &  26.55 & 27.40 &  50 \\
+     60 & 360 & 301 &  46.51 & 31.12 &  60 \\
+     70 & 420 & 351 &  73.85 & 36.14 &  70 \\
+     80 & 480 & 401 & 107.07 & 41.11 &  80 \\
+     90 & 540 & 451 & 145.27 & 46.89 &  90 \\
+    100 & 600 & 501 & 165.29 & 51.72 & 100 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+For the workflow nets, the analysis of all 1976 nets with either termination,
+deadlock-free 1-safe as the property takes less than one minute in total.
+While these nets are rather small, having at most 300 places and usually less than 100,
+methods based on state-based exploration still have
+problems checking certain nets and reach the memory limit due to the large state space.
+%Although through a combination of programs, including LoLA and
+%SARA\footnote{\url{http://service-technology.org/sara/}},
+%all nets could be analysed.
+
+The performance of the liveness analysis on the leader election and snapshot algorithm
+is shown in Table~\ref{table:performance-leader-election}
+and~\ref{table:performance-snapshot}.
+The tables list the number of processes $n$, the size of the constructed Petri net
+in number of places $|P|$ and number of transitions $|T|$, the time and
+memory consumption of Petrinizer and the number of refinement steps.
+For the leader election algorithm, we can prove the property without refinement.
+The method scales well even up to a 100 processes, where the Petri net
+contains 20001 places and transitions.
+
+For the snapshot algorithm, we need refinement to prove the property, with
+a number of refinement steps equal to the number of processes.
+As the set of constraints needs to be solved again after each S-component is added,
+this adversely affects performance, even though the net size does not grow that quickly.
+Still, we can show the property even for a large amount of processes in a reasonable time.
+Also this shows that refinement via S-components is a useful technique for liveness analysis.
 
 \paragraph{Time overhead of Petrinizer's methods.} Before comparing Petrinizer
 with other tools, we analyze time overhead of integer arithmetic, trap refinement, invariant construction, and invariant minimization.
@@ -267,32 +451,18 @@ large example from the Erlang suite, with 66,950 places and 213,635
 transitions and, in the case of invariant construction, the example
 from the MIST suite, with 8989 disjuncts in the property violation constraint.
 
-\paragraph{Conclusions.}
-%
-Marking equations and traps are classical techniques in Petri net theory, but have fallen out of favor
-in recent times in comparison with state-space traversal techniques in combination with abstractions
-or symbolic representations.
-Our experiments demonstrate that, when combined with the power of a modern SMT solver, these techniques
-can be surprisingly effective in finding proofs of correctness (inductive invariants) of common benchmark examples arising
-out of software verification.
-
-Our results also suggest 
-incorporating these techniques into existing tools as a cheap preprocessing step.
-A finer integration with these tools is conceivable, where a
-satisfying assignment to a system of constraints is used to guide the more
-sophisticated search, similar to~\cite{WimmelWolf12}.
 
 % It remains to be seen whether these techniques can be used to check liveness properties of concurrent
 % software, which often reduce to Petri net \emph{reachability} problems and are out of scope of other
 % state-space traversal techniques. Also, a combination with the technique
 % of \cite{WimmelWolf12} should be explored.
 
-\smallskip
-\noindent\textit{Acknowledgements.}
-%
-We thank Emanuele D'Osualdo for help with the Soter tool.
-Ledesma-Garza was supported by the
-Collaborative Research Center 1480 ``Program and Model Analysis'' funded by the German Research Council.
+%\smallskip
+%\noindent\textit{Acknowledgements.}
+%%
+%We thank Emanuele D'Osualdo for help with the Soter tool.
+%Ledesma-Garza was supported by the
+%Collaborative Research Center 1480 ``Program and Model Analysis'' funded by the German Research Council.
 
 % Benchmarks
 
@@ -303,6 +473,8 @@ Collaborative Research Center 1480 ``Program and Model Analysis'' funded by the 
 % Invariant sizes
 
 % Performance
+
+
 
 % Comparison with other tools
 

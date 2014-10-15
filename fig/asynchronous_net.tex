@@ -1,0 +1,58 @@
+\begin{figure}[t]
+  \begin{center}
+    \begin{tikzpicture}[
+        scale=1.0,
+        every node/.style={scale=1.0}
+      ]
+      \draw[box] (-0.25,8.75) rectangle (3.25,2.25);
+      \draw[box] (4.75,8.75) rectangle (8.25,2.25);
+
+      \node at (1.5, 2.75) {Process \textsc{H}};
+      \node at (6.5, 2.75) {Process \textsc{G}};
+
+      \node[place, tokens=1, label=below:$s$] (s) at (4,8.25) {};
+      \node[place, tokens=1, label=below:$x$] (x) at (4,5.5) {};
+      \node[place, label=below:$notx$] (notx) at (4,4) {};
+
+      \node[place, tokens=1, label=left:$ph$] (ph) at (2.25,6.75) {};
+      \node[place, label=left:$h$] (h) at (0.75,4.75) {};
+
+      \node[place, label=right:$pg$] (pg) at (5.75,6.75) {};
+      \node[place, label=right:$g$] (g) at (7.25,4.75) {};
+
+      \node[transition, label=left:$dh$] (dh) at (0.75,7.5) {};
+      \node[transition, label=below:$ht$] (ht) at (2.25,5.5) {};
+      \node[transition, label=below:$hf$] (hf) at (2.25,4) {};
+
+      \node[transition, label=right:$dg$] (dg) at (7.25,7.5) {};
+      \node[transition, label=below:$gt$] (gt) at (5.75,5.5) {};
+      \node[transition, label=below:$gf$] (gf) at (5.75,4) {};
+
+      \draw (s) edge[flow] (dh);
+      \draw (ph) edge[flow] (dh);
+      \draw (dh) edge[flow] (h);
+      \draw (h) edge[flow] (ht);
+      \draw (h) edge[flow] (hf);
+      \draw (x) edge[flow, <->] (ht);
+      \draw (notx) edge[flow, <->] (hf);
+      \draw (ht) edge[flow] (s);
+      \draw (ht) edge[flow] (ph);
+      \draw (ht) edge[flow] (pg);
+      \draw[rounded corners=4mm, flow] (hf.west) -- (-0.75,4) -- (-0.75,9.25) -| ([xshift=-1mm, yshift=-0.2mm] s.north);
+
+      \draw (s) edge[flow] (dg);
+      \draw (pg) edge[flow] (dg);
+      \draw (dg) edge[flow] (g);
+      \draw (g) edge[flow] (gt);
+      \draw (g) edge[flow] (gf);
+      \draw (x) edge[flow] (gt);
+      \draw (gt) edge[flow] (notx);
+      \draw (gt) edge[flow] (s);
+      \draw (notx) edge[flow, <->] (gf);
+      \draw[rounded corners=4mm, flow] (gf.east) -- (8.75,4) -- (8.75,9.25) -| ([xshift=1mm, yshift=-0.2mm] s.north);
+    \end{tikzpicture}
+  \end{center}
+\caption{Petri net for the asynchronous program.}
+\label{fig:asynchronous_net}
+\end{figure}
+

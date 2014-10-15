@@ -62,32 +62,32 @@ components in $\lambda$.
 Inductivity constraints
 $$
 \begin{array}[t]{clclclclclcl}
-    -  & p_1 &  +  & p_2 &     &     &  +  & bit_1 &  -  & notbit_1 &  \le  & 0 \\
-       &     &  -  & p_2 &  +  & p_3 &     &       &     &          &  \le  & 0 \\
+    -  & p_1 &  +  & p_2 &     &     &  +  & bit_1 &  -  & notbit_1 &  \le  & 0 \\[-0.1cm]
+       &     &  -  & p_2 &  +  & p_3 &     &       &     &          &  \le  & 0 \\[-0.1cm]
        & p_1 &     &     &  -  & p_3 &  -  & bit_1 &  +  & notbit_1 &  \le  & 0
 \end{array}
 $$
 
 $$
 \begin{array}[t]{clclclclclclclclclcl}
-    -  & q_1 &  +  & q_2 &     &     &     &     &     &     &  -  & notbit_2 &  \le  & 0  \\
-       &     &  -  & q_2 &  +  & q_3 &     &     &     &     &     &          &  \le  & 0  \\
-       &     &     &     &  -  & q_3 &  +  & q_4 &     &     &  +  & notbit_2 &  \le  & 0  \\
-       & q_1 &     &     &     &     &  -  & q_4 &     &     &     &          &  \le  & 0  \\
-       &     &  -  & q_2 &     &     &     &     &  +  & q_5 &     &          &  \le  & 0  \\
+    -  & q_1 &  +  & q_2 &     &     &     &     &     &     &  -  & notbit_2 &  \le  & 0  \\[-0.1cm]
+       &     &  -  & q_2 &  +  & q_3 &     &     &     &     &     &          &  \le  & 0  \\[-0.1cm]
+       &     &     &     &  -  & q_3 &  +  & q_4 &     &     &  +  & notbit_2 &  \le  & 0  \\[-0.1cm]
+       & q_1 &     &     &     &     &  -  & q_4 &     &     &     &          &  \le  & 0  \\[-0.1cm]
+       &     &  -  & q_2 &     &     &     &     &  +  & q_5 &     &          &  \le  & 0  \\[-0.1cm]
        & q_1 &     &     &     &     &     &     &  -  & q_5 &  +  & notbit_2 &  \le  & 0 
 \end{array}
 $$
 
 Safety constraint
-$$    
+$$
 p_1 + q_1 + notbit_1 + notbit_2 < target_1 + target_2 + trap_1
 $$
 
 Property constraints
 \begin{alignat*}{4}
-  p_1 & \ge 0 & \qquad q_1 & \ge 0 & \qquad q_4 & \ge 0 & \qquad bit_1 & \ge 0  \\
-  p_2 & \ge trap_1 & \qquad q_2 & \ge trap_1 & \qquad q_5 & \ge target_2& \qquad notbit_1 & \ge trap_1 \\
+  p_1 & \ge 0 & \qquad q_1 & \ge 0 & \qquad q_4 & \ge 0 & \qquad bit_1 & \ge 0  \\[-0.1cm]
+  p_2 & \ge trap_1 & \qquad q_2 & \ge trap_1 & \qquad q_5 & \ge target_2& \qquad notbit_1 & \ge trap_1 \\[-0.1cm]
   p_3 & \ge target_1  & \qquad q_3 & \ge trap_1 & & & \qquad notbit_2 & \ge trap_1
 \end{alignat*}
 
@@ -137,5 +137,7 @@ I'(M)\ ::=&\
 \end{align*}
 % The next section shows how to get a simpler one.
 
+\iffalse
 \input{fig/dia_method_invariant_by_refinement}
+\fi
 

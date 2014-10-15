@@ -1,9 +1,184 @@
 \section{Refining transition invariants}
 \label{sec:refining_transition_invariants}
 
-\begin{definition}[S-component~\autocite{DeselEsparza95}]
-    An \emph{S-component} of a net $N = (S,T,F)$
-    is a subnet $N' = (S',T',F')$ where
-    $\pre{s} ∪ \post{s} ⊆ T'$ for all places $s ∈ S$ and
-    $|\pre{t} ∩ S'| = 1 = |\pre{t} ∩ S'|$ for all transitions $t ∈ T'$.
-\end{definition}
+As the test with transition invariants is rather weak in general,
+it has been strengthened by Esparza and Melzer~\cite{EsparzaMelzer97} with
+the use of \emph{S-components}.
+An \emph{S-component}~\cite{DeselEsparza95} of a Petri net $(P,T,F,m_0)$
+is a subnet $(P',T')$, where
+$\pre{p} ∪ \post{p} ⊆ T'$ for all places $p ∈ P'$ and
+$|\pre{t} ∩ P'| = 1 = |\pre{t} ∩ P'|$ for all transitions $t ∈ T'$.
+All transitions connected to a place in the S-component are also
+part of the component, and
+each transition of the component takes exactly one token out
+of and puts one token back in the places in the component when fired.
+Therefore, S-components are also \emph{S-invariants}, and the total
+number of tokens in the places never changes, i.e.\ for an
+S-component $(P',T')$, we have
+$m(S') = m_0(S')$ for all reachable markings $m$.
+
+We can use S-components for excluding some unrealisable transition invariants $X$
+returned by the method \liveness. We will call the new method \livenessref.
+
+\begin{lemma}
+\label{lem:scom-trans}
+For an S-component $(P',T')$ and a semi-positive transition
+T-surinvariant $X$,
+if the subnet $(P', T' \cap \|X\|)$ contains two transitions $t$ and $t'$
+not strongly connected by the flow relation $F'$ induced
+by that subnet, and $m_0(P') = 1$,
+then $X$ is not realisable.
+\end{lemma}
+\begin{proof}
+Assume $X$ is realisable. Then there exists an
+infinite occurence sequence $\tau$ with $\|X\| = \inf(X)$.
+There is a suffix of $\tau$ from where on all occuring
+transitions occur infinitely often, and as $t,t' ∈ T' \cap \|X\| = \inf(X)$,
+they occur in that suffix.
+As both $t$ and $t'$ are part of the S-component, we have places
+$p ∈ \pre{t} \cap P'$ and $p' ∈ \pre{t} \cap P'$ as well as
+$q ∈ \post{t} \cap P'$ and $q' ∈ \post{t} \cap P'$.
+There is always exactly one token in $P'$,
+and due to the properties of the S-component, the token can only move between places
+in $P'$ by transitions in $T'$,
+and in the infinite suffix only by transitions in $\|X\|$.
+At some point, it will stay in one of the strongly connected components
+of the subnet $(P', T' \cap \|X\|)$.
+
+Not all of $p$,$p'$,$q$ and $q'$ can be in the same strongly connected component,
+as otherwise $t$ and $t'$ would be strongly connected.
+If $p$ and $p'$ are in the same component,
+as $t$ and $t'$ fire infinitely often,
+the token will move to a different component of $q$ or $q'$ at some point.
+If they are in different components, the token will be in one of those.
+In both cases, either $p$ or $p'$ will stay unmarked from some point on,
+leaving $t$ or $t'$ unable to fire and therefore $X$ is not realisable.
+\end{proof}
+
+To find such an S-component for a given $X$ with an SMT solver, we need
+to generate constraints capturing these properties.
+To capture the aspect of strong connectivity
+of a subnet $(P', U)$ ($U$ will be $T' \cap \|X\|$ for an S-component $(P',T')$),
+we introduce the relation $\rightsquigarrow_U \subseteq U \times U$.
+It is defined as follows: $t \rightsquigarrow_U t'$ iff $t,t' \in U$ and
+there exists a place $p \in P'$ such that $t \in \pre{p}$ and $t' \in \post{p}$.
+A set $V \subseteq U$ is \emph{closed} under $\rightsquigarrow_U$ if
+$t \in V$ and $t \rightsquigarrow t'$ implies $t' \in V'$.
+
+As the relation follows the paths in the subnet,
+a closed $V$ represents the transitions for sets of strongly connected components.
+Note that $U$ itself is always closed.
+With that we get the following lemma~\cite{EsparzaMelzer97}:
+\begin{lemma}
+\label{lem:closed-conn}
+    For a subnet $(P',U)$,
+    if there exists a $V \subseteq U$ that is closed under $\rightsquigarrow_U$,
+    is non-empty and is not equal to $U$,
+    then there exist $t,t' \in U$ that are not strongly connected in the subnet $(P',U)$.
+\end{lemma}
+\begin{proof}
+    As $V$ is not empty and not equal to $U$, there exists $t \in V$ and $t' \in U \backslash V$.
+    If there would be a path from $t$ to $t'$, there would be
+    $v \rightarrow p \rightarrow u$ along that path with $v \in V$,
+    $p \in P'$ and $u \notin V$, which would mean $V$ is not closed.
+\end{proof}
+
+With that, we can formulate the constraints that,
+given a semi-positive transition surinvariant $X$,
+if satisfiable
+give us an S-component $N' = (P',S')$ to reject $X$ as unrealisable.
+
+\vspace{-0.25cm}
+\begin{itemize}
+    \item $N' = (P',T')$ is an S-component.
+    \item $V$ is a proper, non-empty subset of $T' \cap X$, i.e.
+          $V \subsetneq T' \cap X$ and $V \ne \emptyset$.
+    \item $V$ is closed under $\rightsquigarrow_{T' \cap \|X\|}$, i.e.
+          $\forall p \in P': \forall t \in \pre{p} \cap X, t' \in \post{p} \cap X :
+          t \in V \implies t' \in V$.
+    \item $N'$ initially contains one token, i.e. $m_0(P') = 1$.
+\end{itemize}
+\vspace{-0.25cm}
+
+To solve these constraints with an SMT solver, the free variables $P'$,$T'$ and $V$
+could be encoded as boolean variables representing sets.
+However, we can make use of the SMT solvers capabilities and encode them
+using vectors over integer variables restricted to $\{0,1\}$.
+This is more efficient, as we can encode set size like $|P'|$ as $\sum_{p ∈ P} P'(p)$.
+Membership $p ∈ P$ can be encoded as $P(p) > 0$.
+
+Then, given a Petri net $N = (P, T, F, m_0)$ and a semi-positive T-surinvariant $X$,
+with the free variables $P'$ of size $|P|$, $T'$ of size $|T|$ and $V$ of size $| \|X\| |$,
+the refinement constraints $\mathcal{R}(P, T, F, m_0, X)$ are defined by
+the following constraints~\ref{eq:scomp-first} to~\ref{eq:scomp-last}.
+
+$N' = (P',T')$ is an S-component:
+\begin{align}
+\label{eq:scomp-first}
+    \begin{aligned}
+    &\bigwedge_{p ∈ P} \left[ P'(p) > 0 \implies
+        \bigwedge_{t ∈ \pre{p} \cup \post{p}} T'(t) \right] \land \\
+    &\bigwedge_{t ∈ T} \left[ T'(p) > 0 \implies
+        \sum_{p ∈ \pre{t}} P'(p) = 1 \land \sum_{p ∈ \post{t}} P'(p) = 1 \right]
+    \end{aligned}
+\end{align}
+$V$ is a proper subset of $T' \cap \|X\|$:
+\begin{align}
+    \bigwedge_{t ∈ X} \left[ V(t) > 0 \implies T'(t) > 0 \right] \land
+    \left[ \sum_{t ∈ \|X\|} V(t) < \sum_{t ∈ \|X\|} T'(t) \right]
+\end{align}
+$V$ is non-empty:
+\begin{align}
+    \sum_{t ∈ \|X\|} V(t) > 0
+\end{align}
+$V$ is closed under $\rightsquigarrow_{T' \cap \|X\|}$:
+\begin{align}
+    \bigwedge_{p ∈ P} \left[ P'(p) > 0 \implies
+    \left( \bigwedge_{\substack{t ∈ \pre{p} \cap \|X\|\\ t' ∈ \post{p} \cap \|X\|}} V(t) > 0 \implies V(t') > 0 \right) \right]
+\end{align}
+$N'$ initially contains one token:
+\begin{align}
+    \sum_{p ∈ P} m_0(p) \cdot P'(p) = 1
+\end{align}
+The variables $P'$,$T'$ and $V$ are binary vectors:
+\begin{align}
+\label{eq:scomp-last}
+    \bigwedge_{p ∈ P}  \left[ 0 \le P'(p) \le 1 \right] \land
+    \bigwedge_{t ∈ T'} \left[ 0 \le T'(t) \le 1 \right] \land
+    \bigwedge_{t ∈ \|X\|} \left[ 0 \le V'(t) \le 1 \right]
+\end{align}
+
+When the constraints $\mathcal{R}(P, T, F, m_0, X)$ are satisfiable,
+yielding an S-component $(S',T')$, we know that
+$X$ is not realisable by Lemma~\ref{lem:scom-trans} and~\ref{lem:closed-conn} and can exclude it.
+We can also exclude any other T-surinvariant $Y$ where
+$T' \cap \|Y\| = T' \cap \|X\|$, as it would yield the same subnet with
+the same partition. The constraint added to exclude those is
+\begin{equation}
+\left[ \bigwedge_{t ∈ T' \cap \| X \|} t \right] \implies
+\left[ \bigvee_{t ∈ T' \backslash \| X \|} t \right],
+\end{equation}
+which can be read as ``if all the transitions making the subnet not strongly connected fire,
+at least one other transition in the subnet needs to fire to make it connected''.
+We add these constraints until the set of constraints is unsatisfiable or
+no further S-components can be found.
+
+\paragraph{Example.}
+Consider again the Petri net for the asynchronous program from
+Figure~\ref{fig:asynchronous_net}. Method \liveness\ gave us the
+T-surinvariant $X$ with
+$X(dg) = X(dh) = X(gf) = X(gt) = 1$ and $X(gt) = X(hf) = 0$.
+When solving the constraints $R(P , T , F , m 0 , X)$ for this net and this $X$,
+we obtain the subnet on the left of Figure~\ref{fig:asynchronous_net_scomponent}.
+The subnet represents the state of the variable $x$, which can only be $\true$ or
+$\false$.
+On the right of Figure~\ref{fig:asynchronous_net_scomponent}
+is the subnet with the intersection with $\|X\|$. If $X$ would be realisable,
+$x$ would be tested infinitely often for $\true$ and also for $\false$.
+However, $x$ only changes value a finite amount of times, which is shown
+through the non-connectivity of the subnet. Therefore $X$ is not realisable.
+The constraint $gf \land ht \implies hf \lor gf$ is added to exclude it,
+and then the system is unsatisfiable, so we can prove the liveness property
+for fair termination.
+
+\input{fig/asynchronous_net_scomponent}

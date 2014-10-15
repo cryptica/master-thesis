@@ -1,3 +1,53 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
+\paragraph{Summary.}
+
+In this thesis, we presented
+a method for checking safety properties via marking equations and traps
+and a method for checking liveness properties via transition invariants and S-components.
+
+While both methods have been used in the past, we combined them with the power of a modern
+SMT solver and showed that they are very efficient, often outperforming
+state-of-the-art model checkers.
+These constraint-based approaches offer reduced complexity at the cost of completeness,
+but when applied to common benchmarks arising out of software verification, they prove to be
+quite complete.
+
+Additionally, we presented a new method to find inductive invariants for safety properties.
+These can be used as proofs of correctness and are usually smaller than invariants returned
+by other tools.
+
+All in all, this gives us a very useful tool,
+both on its own and in combination with other tools as a cheap preprocessing step.
+
+%Marking equations and traps are classical techniques in Petri net theory, but have fallen out of favor
+%in recent times in comparison with state-space traversal techniques in combination with abstractions
+%or symbolic representations.
+%Our experiments demonstrate that, when combined with the power of a modern SMT solver, these techniques
+%can be surprisingly effective in finding proofs of correctness (inductive invariants) of common benchmark examples arising
+%out of software verification.
+% It remains to be seen whether these techniques can be used to check liveness properties of concurrent
+% software, which often reduce to Petri net \emph{reachability} problems and are out of scope of other
+% state-space traversal techniques. Also, a combination with the technique
+% of \cite{WimmelWolf12} should be explored.
+
+\paragraph{Future work.}
+
+With the method \safety\ one can only prove that markings are not reachable, and not that they
+are reachable. Following an approach similar to~\cite{WimmelWolf12}, the
+constraints could be used to guide a sophisticated search to a given marking.
+This would allow the method to positively answer reachability problems.
+
+The liveness properties that can be proven by method \liveness\ are somewhat limited.
+Maybe other properties can be encoded similiarly,
+or the method could be combined with Büchi nets like in~\cite{EsparzaMelzer97} to allow
+any LTL-formula to be specified. 
+
+It would also be interesting to see if the method can be applied to
+other benchmarks with different kinds of properties.
+For example, liveness properties of concurrent software
+often reduce to Petri net reachability problems~\cite{GantyMajumdar12}
+which are out of scope of other state-space traversal techniques.
+Our method might be able to handle those problems.
+

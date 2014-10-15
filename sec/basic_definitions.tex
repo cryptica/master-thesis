@@ -1,19 +1,21 @@
 \chapter{Basic definitions}
 \label{chap:basic_definitions}
 
-\paragraph{Nets and markings}
-A \emph{net} is a tuple $(P,T,F)$, where $P$ is a set of \emph{places},
-$T$ is a (disjoint) set of \emph{transitions} and
-$F : (S × T) ∪ (T × S) → \set{0,1}$ is the \emph{flow function}.
-A \emph{marking} of a net is a function $m : P → \mathbb{N}$,
+\paragraph{Nets and markings.}
+A \emph{Petri net} is a tuple $(P,T,F,m_0)$, where $P$ is a set of \emph{places},
+$T$ is a (disjoint) set of \emph{transitions},
+$F : (P × T) ∪ (T × P) → \set{0,1}$ is the \emph{flow function}
+and $m_0$ is the initial marking.
+A \emph{marking} is a function $m : P → \mathbb{N}$,
 which describes the number of tokens $m(p)$ in each place $p\in P$.
 Assuming an enumeration $p_1, \ldots, p_n$ of $P$, we
 often identify $m$ and the vector $(m(p_1), \ldots, m(p_n))$.
 For a subset $P' ⊆ P$ of places, we write $m(P') = \sum_{p\in P'} m(p)$.
-A \emph{Petri net} is a tuple $(P, T, F, m_0)$, where $(P, T, F)$ is
-the underlying net and $m_0$ is the initial marking.
+A \emph{subnet} of a Petri net $(P,T,F,m_0)$ is a tuple $(P',T')$ with
+$P' \subseteq P$ and $T' \subseteq T$.
+The induced flow relation $F'$ of a subnet is the projection of $F$ onto $(P × T) ∪ (T × P)$.
 
-\paragraph{Pre- and post-set}
+\paragraph{Pre- and post-set.}
 For $x\in P\cup T$, the \emph{pre-set} is
 $\pre{x} = \set{y ∈ P ∪ T \mid F(y,x) =1}$
 and the \emph{post-set} is $\post{x} = \set{y ∈ P ∪ T \mid F(x,y) = 1}$.
@@ -21,7 +23,7 @@ We extend the pre- and post-set to a subset of $P ∪ T$ as the union of
 the pre- and post-sets of its elements.
 
 
-\paragraph{Firing transitions}
+\paragraph{Firing transitions.}
 A transition $t \in T$ is \emph{enabled at $m$} iff
 for all $p \in \pre{t}$, we have $m(p) \ge F(p, t)$.
 A transition $t$ enabled at $m$ may \emph{fire},
@@ -34,21 +36,41 @@ $m_1, \ldots, m_r$ such that $m_0 \xrightarrow{t_1} m_1
 \xrightarrow{t_2} m_2 \ldots \xrightarrow{t_r} m_r$. The marking
 $m_r$ is said to be \emph{reachable} from $m_0$ by the occurrence
 of $\sigma$ (denoted $m_0 \xrightarrow{\sigma} m_r$).
+An infinite sequence of transitions, $\tau = t_1 t_2 \ldots$
+is an $\emph{infinite occurence sequence}$ of $N$ iff
+there exist markings $m_1, m_2, \ldots$ such that
+$m_0 \xrightarrow{t_1} m_1 \xrightarrow{t_2} m_2 \ldots$.
+%every finite prefix $\sigma$ of $\tau$ is an occurence sequence of $N$.
+This is denoted by
+$m_0 \xrightarrow{\tau}$. For an infinite occurence sequence $\tau$, the set
+$\inf(\tau) \subseteq T$ contains the transitions that occur infinitely often in $\tau$.
 
-A \emph{property} $\varphi$ is a linear arithmetic constraint over the free variables $P$. 
+A \emph{safety property} $\varphi$ is a linear arithmetic constraint over the free variables $P$. 
 The property $\varphi$ holds on a marking $m$ iff $m \models \varphi$.
-% Examples of properties are $s_1 \le 2$, $s_1 + s_2 \ge 1$ and
-% $((s_1 \le 1) \land (s_2 \ge 1)) \lor (s_3 \le 1)$.
-% 
-A Petri net $N$ satisfies a property $\varphi$ (denoted by $N \models \varphi$)
+ Examples of safety properties are $s_1 \le 2$, $s_1 + s_2 \ge 1$ and
+ $((s_1 \le 1) \land (s_2 \ge 1)) \lor (s_3 \le 1)$.
+A Petri net $N$ satisfies a safety property $\varphi$ (denoted by $N \models \varphi$)
 iff for all reachable markings $m_0 \xrightarrow{\sigma} m$, we have
 $m \models \varphi$.
 A property $\varphi$ is an \emph{invariant} of $N$ if it holds for every reachable marking.
 A property is inductive if whenever $m\models \varphi$ and $m \xrightarrow{t} m'$ for some $t\in T$
 and marking $m'$, we have $m'\models \varphi$.
 
+A \emph{liveness property} $\psi$ is a boolean constraint over the free variables $T$.
+An infinite occurence sequence $\tau$ satisfies $\psi$ (denoted by $\tau \models \psi$)
+iff, with the interpretation $I$ defined as $I(t) := t \in \inf(\tau)$, we have $I \models \psi$.
+A Petri net $N$ satisfies a liveness property $\psi$ (denoted by $N \models \psi$)
+iff for all infinite occurence sequences $\tau$ of $N$, we have $\tau \models \psi$
+In other words, $\psi$ specifies which sets of transitions can occur
+together infinitely often. For example, the property $\psi = \neg (t_1 \land t_2) \lor t_3$
+specifies that there is no sequence where $t_1$ and $t_2$ are fired infinitely often, unless
+$t_3$ is also fired infinitely often. Note that special property $\psi = \false$ is only
+satisfied if the net has no infinite firing sequence at all.
+This property can be used to specify termination of the net.
+
 % A trap is a set of places $S \subseteq P$ such that $\post{S} \subseteq \pre{S}$.
 % If a trap $S$ is marked in $m_0$, i.e. $\sum_{p \in S} m_0(p) > 0$, then it is also marked in all reachable markings.
+
 
 Petri nets are represented graphically as follows: places and transitions
 are represented as circles and boxes, respectively. For $x, y \in P \cup T$,
@@ -66,25 +88,14 @@ diagram model the current values of the variables. For instance, a
 token in place $notbit_1$ indicates that the variable $bit_1$ is currently
 set to $\false$.
 The mutual exclusion property, which states that the two processes cannot be in the
-critical section at the same time, corresponds to the property that
+critical section at the same time, corresponds to the property
+$\varphi = (p_3 = 0) \lor (q_5 = 0)$, i.e.\ that
 places $p_3$ and $q_5$ cannot both have a token at the same time.
 
-%% TODO %%
+%A liveness property for fairness could be
+
+\newpage
 
 \input{fig/lamport_src}
 \input{fig/lamport_net}
-
-As an example, consider Lamport's 1-bit
-algorithm for mutual exclusion~\cite{Lamport86}, shown in
-Fig.~\ref{fig:lamport_src}. 
-Fig.~\ref{fig:lamport_net} shows a Petri net model for the code.
-The two grey blocks model the control flow of the two
-processes. For instance, the token in place $p_1$ models the current
-position of process 1 at program location $p_1$. The three places in the middle of the
-diagram model the current values of the variables. For instance, a
-token in place $notbit_1$ indicates that the variable $bit_1$ is currently
-set to $\false$.
-The mutual exclusion property, which states that the two processes cannot be in the
-critical section at the same time, corresponds to the property that
-places $p_3$ and $q_5$ cannot both have a token at the same time.
 

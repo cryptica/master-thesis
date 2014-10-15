@@ -1,0 +1,42 @@
+\begin{figure}[t]
+  \hrule
+  \centering
+  \begin{minipage}[t]{.04\columnwidth}
+   \mbox{} \\ \\ \\ $h$:\\ \\ \\
+  \end{minipage}
+  \begin{minipage}[t]{.26\columnwidth}
+    \mbox{}\\
+    \algProcedure \textsc{H} \\
+    \algBegin \\
+    \tabT \algIf $x$ \algThen \\
+    \tabTT \algPost\textsc{} H \\
+    \tabTT \algPost\textsc{} G \\
+    \tabT \algFi \\
+    \algEnd
+  \end{minipage}
+  \begin{minipage}[t]{.04\columnwidth}
+   \mbox{} \\ \\ \\ $g$:\\ \\ \\
+  \end{minipage}
+  \begin{minipage}[t]{.26\columnwidth}
+    \mbox{}\\
+    \algProcedure \textsc{G} \\
+    \algBegin \\
+    \tabT $x$ \algAssgn $\false$ \\
+    \algEnd
+  \end{minipage}
+  \begin{minipage}[t]{.04\columnwidth}
+   \mbox{} \\ \\ \\ \\ \\ \\
+  \end{minipage}
+  \begin{minipage}[t]{.26\columnwidth}
+    \mbox{}\\
+    \algProcedure \textsc{Main} \\
+    \algBegin \\
+    \tabT $x$ \algAssgn $\true$ \\
+    \tabT \algPost\textsc{H} \\
+    \algEnd
+  \end{minipage}
+  \vspace{1.5ex}
+  \hrule
+\caption{Asynchronous program.}
+\label{fig:asynchronous_src}
+\end{figure}
