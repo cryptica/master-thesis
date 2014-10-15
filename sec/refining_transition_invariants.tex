@@ -33,7 +33,8 @@ then $X$ is not realisable.
 Assume $X$ is realisable. Then there exists an
 infinite occurence sequence $\tau$ with $\|X\| = \inf(X)$.
 There is a suffix of $\tau$ from where on all occuring
-transitions occur infinitely often, and as $t,t' ∈ T' \cap \|X\| = \inf(X)$,
+transitions occur infinitely often, and as
+$t,t' ∈ T' \cap \|X\| \subseteq \inf(X)$,
 they occur in that suffix.
 As both $t$ and $t'$ are part of the S-component, we have places
 $p ∈ \pre{t} \cap P'$ and $p' ∈ \pre{t} \cap P'$ as well as
@@ -124,7 +125,7 @@ $N' = (P',T')$ is an S-component:
 \end{align}
 $V$ is a proper subset of $T' \cap \|X\|$:
 \begin{align}
-    \bigwedge_{t ∈ X} \left[ V(t) > 0 \implies T'(t) > 0 \right] \land
+    \bigwedge_{t ∈ \|X\|} \left[ V(t) > 0 \implies T'(t) > 0 \right] \land
     \left[ \sum_{t ∈ \|X\|} V(t) < \sum_{t ∈ \|X\|} T'(t) \right]
 \end{align}
 $V$ is non-empty:
